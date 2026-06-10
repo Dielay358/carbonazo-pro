@@ -1,0 +1,23 @@
+{
+  "build": "pyhd3eb1b0_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/noarch/",
+  "constrains": [],
+  "depends": [
+    "idna >=2.5",
+    "python"
+  ],
+  "fn": "hyperlink-21.0.0-pyhd3eb1b0_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "8b1ba827e0fecc1c857577a3d51aa653",
+  "name": "hyperlink",
+  "noarch": "python",
+  "package_type": "noarch_python",
+  "sha256": "f2037529715e52123c29eb1ca7f454f6bf036f1e6b4066e233e7e88011f14917",
+  "size": 71627,
+  "subdir": "noarch",
+  "timestamp": 1610130777000,
+  "url": "https://repo.anaconda.com/pkgs/main/noarch/hyperlink-21.0.0-pyhd3eb1b0_0.conda",
+  "version": "21.0.0"
+}

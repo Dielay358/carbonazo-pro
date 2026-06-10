@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "referencing >=0.31.0"
+  ],
+  "fn": "jsonschema-specifications-2025.9.1-py313haa95532_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "5c075ecdc29eda1f025dfdc4e0f6efcb",
+  "name": "jsonschema-specifications",
+  "platform": "win32",
+  "sha256": "28620856a54ef6885be4360f5b85633685ddb4d88b2a43b57c7bdffc19335e09",
+  "size": 17206,
+  "subdir": "win-64",
+  "timestamp": 1762788650000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/jsonschema-specifications-2025.9.1-py313haa95532_0.conda",
+  "version": "2025.9.1"
+}

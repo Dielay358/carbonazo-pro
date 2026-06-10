@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "dill-0.4.0-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "75a96f1aa44a991db0328540bcbc0d3b",
+  "name": "dill",
+  "platform": "win32",
+  "sha256": "4b5339b15197d3e85523f0c075ae4404b0847e01c3feb243acbfbb17ab2538e7",
+  "size": 259528,
+  "subdir": "win-64",
+  "timestamp": 1760096921000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/dill-0.4.0-py313haa95532_0.conda",
+  "version": "0.4.0"
+}

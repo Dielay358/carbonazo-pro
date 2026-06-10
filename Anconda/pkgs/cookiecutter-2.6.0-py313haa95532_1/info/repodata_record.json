@@ -1,0 +1,31 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "arrow",
+    "binaryornot >=0.4.4",
+    "click >=7.0,<9.0.0",
+    "jinja2 >=2.7,<4.0.0",
+    "python >=3.13,<3.14.0a0",
+    "python-slugify >=4.0.0",
+    "python_abi 3.13.* *_cp313",
+    "pyyaml >=5.3.1",
+    "requests >=2.23.0",
+    "rich"
+  ],
+  "fn": "cookiecutter-2.6.0-py313haa95532_1.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "20e02bf889c6b288cbcb2428c83b15c8",
+  "name": "cookiecutter",
+  "platform": "win32",
+  "sha256": "83c415775301cb9a175240a8a4e3bb124a08868c5a8d4549b9801999f3f9ee89",
+  "size": 173954,
+  "subdir": "win-64",
+  "timestamp": 1751314570000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/cookiecutter-2.6.0-py313haa95532_1.conda",
+  "version": "2.6.0"
+}

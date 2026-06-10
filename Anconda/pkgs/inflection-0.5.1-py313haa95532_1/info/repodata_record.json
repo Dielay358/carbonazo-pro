@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "inflection-0.5.1-py313haa95532_1.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "7373f388aad9f05df649dd1ad69ab8e8",
+  "name": "inflection",
+  "platform": "win32",
+  "sha256": "5bc15a0ec0f4f64de07119f6130d4b6a3346346cddef1b3d3414e71f4e95b801",
+  "size": 16178,
+  "subdir": "win-64",
+  "timestamp": 1729054688000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/inflection-0.5.1-py313haa95532_1.conda",
+  "version": "0.5.1"
+}

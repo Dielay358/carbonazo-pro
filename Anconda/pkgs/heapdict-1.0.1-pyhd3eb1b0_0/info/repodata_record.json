@@ -1,0 +1,21 @@
+{
+  "build": "pyhd3eb1b0_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/noarch/",
+  "constrains": [],
+  "depends": [
+    "python"
+  ],
+  "fn": "heapdict-1.0.1-pyhd3eb1b0_0.conda",
+  "license": "BSD 3-Clause",
+  "md5": "15616615a6c63c0aa7a17ff2e4caea04",
+  "name": "heapdict",
+  "noarch": "python",
+  "package_type": "noarch_python",
+  "sha256": "4265dfff4193b9fcd24d66eeedd76aa50f3b540543d0b268434c72beb0c8d4e7",
+  "size": 8167,
+  "subdir": "noarch",
+  "timestamp": 1630598543000,
+  "url": "https://repo.anaconda.com/pkgs/main/noarch/heapdict-1.0.1-pyhd3eb1b0_0.conda",
+  "version": "1.0.1"
+}

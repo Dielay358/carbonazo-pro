@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "jupyterlab >=4.0.0,<5",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "jupyterlab-variableinspector-3.2.4-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "ccd102046367f32f8c51fd8e2be31ccd",
+  "name": "jupyterlab-variableinspector",
+  "platform": "win32",
+  "sha256": "7ad4546f16beab2ec81b60e8982c9a683522ea4cbaeaa1da6f9126c18cf0149f",
+  "size": 126355,
+  "subdir": "win-64",
+  "timestamp": 1744638895000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/jupyterlab-variableinspector-3.2.4-py313haa95532_0.conda",
+  "version": "3.2.4"
+}

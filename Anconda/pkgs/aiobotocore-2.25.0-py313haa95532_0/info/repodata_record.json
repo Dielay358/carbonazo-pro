@@ -1,0 +1,34 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [
+    "boto3 >=1.40.46,<1.40.50",
+    "httpx >=0.25.1,<0.29",
+    "awscli >=1.42.46,<1.42.50"
+  ],
+  "depends": [
+    "aiohttp >=3.9.2,<4.0.0",
+    "aioitertools >=0.5.1,<1.0.0",
+    "botocore >=1.40.46,<1.40.50",
+    "jmespath >=0.7.1,<2.0.0",
+    "multidict >=6.0.0,<7.0.0",
+    "python >=3.13,<3.14.0a0",
+    "python-dateutil >=2.1,<3.0.0",
+    "python_abi 3.13.* *_cp313",
+    "wrapt >=1.10.10,<2.0.0"
+  ],
+  "fn": "aiobotocore-2.25.0-py313haa95532_0.conda",
+  "license": "Apache-2.0",
+  "license_family": "Apache",
+  "md5": "32ff2f197fd4b090d701a4d0beb1357f",
+  "name": "aiobotocore",
+  "platform": "win32",
+  "sha256": "7756295e18e2cb87c534add6c0cbe71a4e5307062ac634b439979884aeaf57c8",
+  "size": 176867,
+  "subdir": "win-64",
+  "timestamp": 1760994379000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/aiobotocore-2.25.0-py313haa95532_0.conda",
+  "version": "2.25.0"
+}

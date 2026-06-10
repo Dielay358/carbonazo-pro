@@ -1,0 +1,25 @@
+{
+  "arch": "x86_64",
+  "build": "h02ab6af_2",
+  "build_number": 2,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "aws-c-common >=0.12.4,<0.12.5.0a0",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "aws-c-compression-0.3.1-h02ab6af_2.conda",
+  "license": "Apache-2.0",
+  "license_family": "Apache",
+  "md5": "dc6792f025258b29f4ee7d3d59e33864",
+  "name": "aws-c-compression",
+  "platform": "win32",
+  "sha256": "0fa1cf73689026cf3f1ab629ee0563b45c5ece127cd1b7c1e0287a76d6aa2f10",
+  "size": 32450,
+  "subdir": "win-64",
+  "timestamp": 1756733067000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/aws-c-compression-0.3.1-h02ab6af_2.conda",
+  "version": "0.3.1"
+}

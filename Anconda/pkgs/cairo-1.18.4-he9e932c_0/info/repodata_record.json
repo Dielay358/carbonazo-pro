@@ -1,0 +1,30 @@
+{
+  "arch": "x86_64",
+  "build": "he9e932c_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "fontconfig >=2.14.1,<3.0a0",
+    "freetype >=2.13.3,<3.0a0",
+    "libglib >=2.84.2,<3.0a0",
+    "libpng >=1.6.39,<1.7.0a0",
+    "pixman >=0.46.4,<1.0a0",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133",
+    "zlib >=1.2.13,<2.0.0a0"
+  ],
+  "fn": "cairo-1.18.4-he9e932c_0.conda",
+  "license": "LGPL-2.1-or-later or MPL-1.1",
+  "license_family": "LGPL",
+  "md5": "16ddad359dc7d979902ebf44e84aa2c5",
+  "name": "cairo",
+  "platform": "win32",
+  "sha256": "7fa5cd252dcefb5cf391a7e4f0fb4f7f307d2d5860a15d836d37cfc874a7e6f3",
+  "size": 652037,
+  "subdir": "win-64",
+  "timestamp": 1756136839000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/cairo-1.18.4-he9e932c_0.conda",
+  "version": "1.18.4"
+}

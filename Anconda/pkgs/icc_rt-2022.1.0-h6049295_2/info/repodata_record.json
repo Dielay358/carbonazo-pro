@@ -1,0 +1,19 @@
+{
+  "arch": "x86_64",
+  "build": "h6049295_2",
+  "build_number": 2,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [],
+  "fn": "icc_rt-2022.1.0-h6049295_2.conda",
+  "license": "Intel proprietary",
+  "md5": "4ea9e3682a5114c1ee3dc09bac898e8d",
+  "name": "icc_rt",
+  "platform": "win32",
+  "sha256": "9b2b6f2bc25c061c9a2ba16ef95f77ad330e8ad233a1134330aeed354c2bbe5c",
+  "size": 6846362,
+  "subdir": "win-64",
+  "timestamp": 1664812389000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/icc_rt-2022.1.0-h6049295_2.conda",
+  "version": "2022.1.0"
+}

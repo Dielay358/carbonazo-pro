@@ -1,0 +1,30 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "anaconda-client",
+    "conda-pack",
+    "jinja2",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "requests",
+    "ruamel_yaml",
+    "tornado >=4.2",
+    "tqdm"
+  ],
+  "fn": "anaconda-project-0.11.1-py313haa95532_1.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "a76254e74a7bd540d8cf62fcf1e06653",
+  "name": "anaconda-project",
+  "platform": "win32",
+  "sha256": "967abdf230f47380b47f2618c4a37f4eedd6d7916ea8a126bf83fc7969e78571",
+  "size": 746065,
+  "subdir": "win-64",
+  "timestamp": 1746215658000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/anaconda-project-0.11.1-py313haa95532_1.conda",
+  "version": "0.11.1"
+}

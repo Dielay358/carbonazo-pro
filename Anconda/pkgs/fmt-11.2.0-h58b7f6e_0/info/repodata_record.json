@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "h58b7f6e_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "fmt-11.2.0-h58b7f6e_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "de02359dfe1a0b71736085f1e65508f1",
+  "name": "fmt",
+  "platform": "win32",
+  "sha256": "34df803b78d9c5b23674c0663b505980025afbc6098d8fb53cb9b6c1b4b33082",
+  "size": 209011,
+  "subdir": "win-64",
+  "timestamp": 1754991152000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/fmt-11.2.0-h58b7f6e_0.conda",
+  "version": "11.2.0"
+}

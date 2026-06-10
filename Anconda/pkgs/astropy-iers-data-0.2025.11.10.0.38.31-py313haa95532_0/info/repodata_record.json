@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "astropy-iers-data-0.2025.11.10.0.38.31-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "4672e23f77f060ff1245bb6b6d8c54b3",
+  "name": "astropy-iers-data",
+  "platform": "win32",
+  "sha256": "470bbe5edb3a283d40cb0cf2db8f42d1e5f6a0db479ab4a8a75527fe2428f3c2",
+  "size": 1220492,
+  "subdir": "win-64",
+  "timestamp": 1763020037000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/astropy-iers-data-0.2025.11.10.0.38.31-py313haa95532_0.conda",
+  "version": "0.2025.11.10.0.38.31"
+}

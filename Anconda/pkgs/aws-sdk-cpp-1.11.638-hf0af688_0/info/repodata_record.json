@@ -1,0 +1,29 @@
+{
+  "arch": "x86_64",
+  "build": "hf0af688_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "aws-c-common >=0.12.4,<0.12.5.0a0",
+    "aws-c-event-stream >=0.5.6,<0.5.7.0a0",
+    "aws-crt-cpp >=0.34.0,<0.34.1.0a0",
+    "libcurl >=8.15.0,<9.0a0",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133",
+    "zlib >=1.2.13,<2.0.0a0"
+  ],
+  "fn": "aws-sdk-cpp-1.11.638-hf0af688_0.conda",
+  "license": "Apache-2.0",
+  "license_family": "Apache",
+  "md5": "4e9fe5df170b826df485aa695593fee3",
+  "name": "aws-sdk-cpp",
+  "platform": "win32",
+  "sha256": "db2c7147900b2524878ac022be8849b3114699f6739494ce1d2353e91a190d58",
+  "size": 3330838,
+  "subdir": "win-64",
+  "timestamp": 1756812622000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/aws-sdk-cpp-1.11.638-hf0af688_0.conda",
+  "version": "1.11.638"
+}

@@ -1,0 +1,32 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "colorama >=0.4.4",
+    "decorator >=4.3.2",
+    "ipython_pygments_lexers >=1.0.0",
+    "jedi >=0.18.1",
+    "matplotlib-inline >=0.1.5",
+    "prompt_toolkit >=3.0.41,<3.1.0",
+    "pygments >=2.11.0",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "stack_data >=0.6.0",
+    "traitlets >=5.13.0"
+  ],
+  "fn": "ipython-9.7.0-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "c909d1c674bd6e1201950c85713633cc",
+  "name": "ipython",
+  "platform": "win32",
+  "sha256": "45a41240d4baab177cf45263f0f3de0e13f130cf9f35cb4a8bb4c3b298385d1b",
+  "size": 1282124,
+  "subdir": "win-64",
+  "timestamp": 1762789393000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/ipython-9.7.0-py313haa95532_0.conda",
+  "version": "9.7.0"
+}

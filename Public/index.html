@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS El Carbonazo Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+    <div class="logo">
+        <i class="fas fa-fire"></i> El Carbonazo <span>PRO</span>
+    </div>
+    
+    <!-- NUEVO: Selector de Mesero -->
+    <div class="usuario-selector">
+        <i class="fas fa-user-tag"></i>
+        <select id="select-mesero" onchange="cambiarMesero()">
+            <!-- Se llena con JS -->
+        </select>
+    </div>
+
+    <div id="status-conexion" class="status-online">
+        <i class="fas fa-circle"></i> Online (Ngrok)
+    </div>
+</header>
+
+    <main class="contenedor-principal">
+        <!-- SECCIÓN IZQUIERDA: MENÚ -->
+        <section class="seccion-menu">
+            <div class="buscador">
+                <input type="text" id="buscar-producto" placeholder="Buscar platillo...">
+            </div>
+            <!-- Barra de Categorías Dinámica -->
+<div id="barra-categorias" class="filtros-categoria">
+    <!-- Se llena con JS -->
+</div>
+            <div class="grid-productos" id="contenedor-menu">
+                <!-- Aquí se cargarán los productos dinámicamente -->
+            </div>
+        </section>
+
+        <!-- SECCIÓN DERECHA: CARRITO -->
+        <section class="seccion-carrito">
+            <div class="cabecera-carrito">
+                <h3><i class="fas fa-shopping-cart"></i> Pedido Actual</h3>
+            </div>
+            <div class="info-pedido">
+                <select id="tipo-pedido">
+                    <option value="Mesa">Para la Mesa</option>
+                    <option value="Llevar">Para Llevar</option>
+                    <option value="Domicilio">Domicilio</option>
+                </select>
+                <input type="text" id="id-mesa" placeholder="N° Mesa / Cliente">
+            </div>
+            <div class="lista-items" id="items-carrito">
+                <p class="carrito-vacio">El carrito está vacío</p>
+            </div>
+            <div class="totales">
+                <div class="fila-total">
+                    <span>Total:</span>
+                    <span id="total-monto">C$ 0.00</span>
+                </div>
+                <button id="btn-cobrar" class="btn-exito">
+                    <i class="fas fa-check-circle"></i> REALIZAR VENTA
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modales y Elementos Flotantes -->
+    <div id="modal-ventas" class="modal">
+        <div class="contenido-modal">
+            <header class="header-modal">
+                <h2><i class="fas fa-list"></i> Historial de Ventas</h2>
+                <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
+            </header>
+            <div class="tabla-contenedor">
+                <!-- Busca esta parte en tu index.html -->
+<table id="tabla-ventas">
+<!-- Busca la tabla de ventas y agrega el <th> de Acción -->
+<thead>
+    <tr>
+        <th>ID</th>
+        <th>Fecha/Hora</th> <!-- Unificado -->
+        <th>Mesa</th>
+        <th>Mesero</th>
+        <th>Total</th>
+        <th>Acción</th> <!-- NUEVA -->
+    </tr>
+</thead>
+    <tbody id="cuerpo-tabla-ventas">
+        <!-- Los datos aparecerán aquí -->
+    </tbody>
+</table>
+            </div>
+        </div>
+    </div>
+<!-- Modal Gestión de Productos -->
+<div id="modal-admin-productos" class="modal">
+    <div class="contenido-modal">
+        <header class="header-modal">
+            <h2><i class="fas fa-tools"></i> Gestión de Menú</h2>
+            <button onclick="cerrarModalAdmin()" class="btn-cerrar">&times;</button>
+        </header>
+        <div class="tabla-contenedor">
+            <!-- Formulario para agregar -->
+            <div style="background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>Agregar Nuevo Platillo</h4>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px;">
+                    <input type="text" id="nuevo-nombre" placeholder="Nombre (Ej: Asado)">
+                    <input type="number" id="nuevo-precio" placeholder="Precio (Ej: 150)">
+                    <input type="text" id="nuevo-icono" placeholder="Emoji (Ej: 🥩)" style="width: 80px;">
+                    <button onclick="guardarNuevoProducto()" class="btn-exito" style="padding: 10px; width: auto;">
+                        <i class="fas fa-plus"></i> Guardar
+                    </button>
+                </div>
+            </div>
+            <!-- Lista para borrar -->
+            <table id="tabla-admin-productos">
+                <thead>
+                    <tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="cuerpo-tabla-admin">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Botón para abrir Admin (puedes ponerlo cerca del logo o abajo) -->
+<button onclick="abrirAdminProductos()" style="position: fixed; bottom: 20px; left: 100px; width: 60px; height: 60px; border-radius: 50%; background: #333; color: white; border: none; cursor: pointer;">
+    <i class="fas fa-cog"></i>
+</button>
+
+    <button id="btn-flotante-historial" onclick="abrirModalVentas()">
+        <i class="fas fa-history"></i>
+    </button>
+
+    <div id="area-impresion"></div>
+
+    <!-- Audios -->
+    <audio id="sonido-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+    <audio id="sonido-exito" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+
+    <!-- SCRIPT ÚNICO -->
+    <script src="app.js"></script>
+
+    <!-- Modal Cierre de Caja -->
+<div id="modal-cierre" class="modal">
+    <div class="contenido-modal" style="max-width: 450px;">
+        <header class="header-modal" style="background: var(--exito);">
+            <h2><i class="fas fa-cash-register"></i> Cierre de Caja Diario</h2>
+            <button onclick="cerrarModalCierre()" class="btn-cerrar">&times;</button>
+        </header>
+        <div id="cuerpo-cierre" style="padding: 20px;">
+            <!-- Se llena con JS -->
+        </div>
+        <div style="padding: 20px; text-align: center;">
+            <button onclick="window.print()" class="btn-exito" style="width: auto; padding: 10px 20px;">
+                <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Botón para abrir Cierre (Puedes ponerlo junto al de Admin) -->
+<button id="btn-cierre-caja" onclick="abrirCierreCaja()" style="position: fixed; bottom: 20px; left: 180px; width: 60px; height: 60px; border-radius: 50%; background: var(--exito); color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <i class="fas fa-file-invoice-dollar"></i>
+</button>
+
+<div id="modal-editar-producto" class="modal">
+    <div class="contenido-modal" style="max-width: 400px;">
+        <header class="header-modal">
+            <h2>Editar Producto</h2>
+            <button onclick="cerrarModalEditor()" class="btn-cerrar">&times;</button>
+        </header>
+        <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <input type="hidden" id="edit-id">
+            <label>Nombre:</label> <input type="text" id="edit-nombre">
+            <label>Precio (C$):</label> <input type="number" id="edit-precio">
+            <label>Icono (Emoji):</label> <input type="text" id="edit-icono">
+            <label>Categoría:</label> <input type="text" id="edit-categoria">
+            <button onclick="enviarActualizacion()" class="btn-exito">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

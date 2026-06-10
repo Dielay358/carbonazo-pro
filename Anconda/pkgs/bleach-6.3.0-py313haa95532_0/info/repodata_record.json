@@ -1,0 +1,27 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [
+    "tinycss2 >=1.1.0,<1.5"
+  ],
+  "depends": [
+    "html5lib 1.1",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "webencodings"
+  ],
+  "fn": "bleach-6.3.0-py313haa95532_0.conda",
+  "license": "Apache-2.0",
+  "license_family": "Apache",
+  "md5": "0878e3b79c1247e64ea8cd3bc9b67dc2",
+  "name": "bleach",
+  "platform": "win32",
+  "sha256": "8211bc216507b01ba24a705df2ea0756fd47ef6cfffb604242a8f8d3381bf6be",
+  "size": 98527,
+  "subdir": "win-64",
+  "timestamp": 1764153712000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/bleach-6.3.0-py313haa95532_0.conda",
+  "version": "6.3.0"
+}

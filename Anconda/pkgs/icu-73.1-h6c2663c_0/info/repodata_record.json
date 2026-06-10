@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "h6c2663c_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "vc >=14.1,<15.0a0",
+    "vs2015_runtime >=14.16.27012,<15.0a0"
+  ],
+  "fn": "icu-73.1-h6c2663c_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "fc3e340c69e5b0588787ec4ef37c189b",
+  "name": "icu",
+  "platform": "win32",
+  "sha256": "0d80fa574049a7fdea10f9e24191ae04663e19123a6459cdd893247b371e24f9",
+  "size": 30951468,
+  "subdir": "win-64",
+  "timestamp": 1692294548000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/icu-73.1-h6c2663c_0.conda",
+  "version": "73.1"
+}

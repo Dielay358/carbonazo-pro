@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "ha349fce_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "jpeg-9f-ha349fce_0.conda",
+  "license": "IJG",
+  "license_family": "Other",
+  "md5": "8d89ac2996713e9c473377e7d249c0cc",
+  "name": "jpeg",
+  "platform": "win32",
+  "sha256": "5f838af84fa432ba6498bb9c149fa66383f7805cbf351df0f9e70cf2c6ca9034",
+  "size": 309034,
+  "subdir": "win-64",
+  "timestamp": 1757499108000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/jpeg-9f-ha349fce_0.conda",
+  "version": "9f"
+}

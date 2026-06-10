@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "h731ff69_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "c-ares-1.34.5-h731ff69_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "3c00024e1a72786537aafcc3704e15a7",
+  "name": "c-ares",
+  "platform": "win32",
+  "sha256": "fb08ad3e4bc962c425886378bb53493563d98e359b7bc96616ea2fdbe094a5fe",
+  "size": 221965,
+  "subdir": "win-64",
+  "timestamp": 1756141648000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/c-ares-1.34.5-h731ff69_0.conda",
+  "version": "1.34.5"
+}

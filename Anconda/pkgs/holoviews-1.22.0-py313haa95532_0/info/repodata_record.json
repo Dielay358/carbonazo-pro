@@ -1,0 +1,36 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [
+    "plotly >=4.0"
+  ],
+  "depends": [
+    "bokeh >=3.1",
+    "colorcet",
+    "matplotlib-base >=3",
+    "narwhals >=2",
+    "numpy >=1.21",
+    "packaging",
+    "pandas >=1.3",
+    "panel >=1.0",
+    "param >=2.0,<3.0",
+    "python >=3.13,<3.14.0a0",
+    "python-dateutil >=2.8.2",
+    "python_abi 3.13.* *_cp313",
+    "pyviz_comms >=2.1"
+  ],
+  "fn": "holoviews-1.22.0-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "419ba20db2a3be7a3afe3c7ad31041b0",
+  "name": "holoviews",
+  "platform": "win32",
+  "sha256": "2dd8b4b23230dda9a255579df10ec88d74ac320f5dad1abccbf79f0db1846aa5",
+  "size": 7297309,
+  "subdir": "win-64",
+  "timestamp": 1763365433000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/holoviews-1.22.0-py313haa95532_0.conda",
+  "version": "1.22.0"
+}

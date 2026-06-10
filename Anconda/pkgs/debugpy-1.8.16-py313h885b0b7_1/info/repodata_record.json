@@ -1,0 +1,26 @@
+{
+  "arch": "x86_64",
+  "build": "py313h885b0b7_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "debugpy-1.8.16-py313h885b0b7_1.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "96da13ec79332a1e74c27009d7ce978c",
+  "name": "debugpy",
+  "platform": "win32",
+  "sha256": "5601a34f0ecc9b84e8fb8e89f6c85791c5be5f601d6678642c8bd05b1331b754",
+  "size": 3723551,
+  "subdir": "win-64",
+  "timestamp": 1762421764000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/debugpy-1.8.16-py313h885b0b7_1.conda",
+  "version": "1.8.16"
+}

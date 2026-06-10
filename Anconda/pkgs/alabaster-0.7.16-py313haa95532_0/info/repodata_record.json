@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "alabaster-0.7.16-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "d391ca57f13d21e58a49dc2fb4547087",
+  "name": "alabaster",
+  "platform": "win32",
+  "sha256": "2fb463135a62e3c86519d3be161fbcf0dc02f0ed9010603e9a27d0efe274ae8f",
+  "size": 20529,
+  "subdir": "win-64",
+  "timestamp": 1729041963000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/alabaster-0.7.16-py313haa95532_0.conda",
+  "version": "0.7.16"
+}

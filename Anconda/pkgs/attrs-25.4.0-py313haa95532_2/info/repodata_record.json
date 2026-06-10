@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_2",
+  "build_number": 2,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "attrs-25.4.0-py313haa95532_2.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "9a96bb2400267b286303f8c66ee2f6ce",
+  "name": "attrs",
+  "platform": "win32",
+  "sha256": "1884b3f775276704186b41677f8a55ef0ee3d8d53728f1090caac8ef48f8e43a",
+  "size": 179422,
+  "subdir": "win-64",
+  "timestamp": 1762356939000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/attrs-25.4.0-py313haa95532_2.conda",
+  "version": "25.4.0"
+}

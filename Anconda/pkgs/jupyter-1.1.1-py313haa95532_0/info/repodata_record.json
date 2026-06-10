@@ -1,0 +1,30 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "ipykernel",
+    "ipywidgets",
+    "jupyter_console",
+    "jupyterlab",
+    "nbconvert",
+    "notebook",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "qtconsole"
+  ],
+  "fn": "jupyter-1.1.1-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "82bef0cc2e67be78bee4a520f1bd11ab",
+  "name": "jupyter",
+  "platform": "win32",
+  "sha256": "88dd38bc2be1ba0258ab80d2d6cdab6ae99253e0faf103a291b1cdc8dc2b0cd0",
+  "size": 9096,
+  "subdir": "win-64",
+  "timestamp": 1742595018000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/jupyter-1.1.1-py313haa95532_0.conda",
+  "version": "1.1.1"
+}

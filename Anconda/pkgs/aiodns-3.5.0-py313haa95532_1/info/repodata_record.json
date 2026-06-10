@@ -1,0 +1,25 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "pycares >=4.9.0",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "winloop >=0.1.8"
+  ],
+  "fn": "aiodns-3.5.0-py313haa95532_1.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "a39c6869ab9515d3641f717e1f20cab2",
+  "name": "aiodns",
+  "platform": "win32",
+  "sha256": "3742dd19a30fee266c2e7451eaac2d804a52eece222f6d44d02996bd1511c5f6",
+  "size": 24547,
+  "subdir": "win-64",
+  "timestamp": 1762185118000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/aiodns-3.5.0-py313haa95532_1.conda",
+  "version": "3.5.0"
+}

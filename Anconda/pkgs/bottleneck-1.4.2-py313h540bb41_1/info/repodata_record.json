@@ -1,0 +1,27 @@
+{
+  "arch": "x86_64",
+  "build": "py313h540bb41_1",
+  "build_number": 1,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "numpy >=1.21,<3",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "ucrt >=10.0.20348.0",
+    "vc >=14.2,<15",
+    "vc14_runtime >=14.29.30133"
+  ],
+  "fn": "bottleneck-1.4.2-py313h540bb41_1.conda",
+  "license": "BSD-2-Clause",
+  "license_family": "BSD",
+  "md5": "028db917b514dc473215acb7e5b1abe2",
+  "name": "bottleneck",
+  "platform": "win32",
+  "sha256": "72d1d1b14c47363d68a75d00d1eb267901d7140a8edb9c83311878398d089369",
+  "size": 139996,
+  "subdir": "win-64",
+  "timestamp": 1761938199000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/bottleneck-1.4.2-py313h540bb41_1.conda",
+  "version": "1.4.2"
+}

@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "imagesize-1.4.1-py313haa95532_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "ad355310575235d79570bab544043b12",
+  "name": "imagesize",
+  "platform": "win32",
+  "sha256": "f7f0bab1b223415ae3ad0648115254b3d1d144ae3bb9f5503fa4045f820a39f1",
+  "size": 17974,
+  "subdir": "win-64",
+  "timestamp": 1729042643000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/imagesize-1.4.1-py313haa95532_0.conda",
+  "version": "1.4.1"
+}

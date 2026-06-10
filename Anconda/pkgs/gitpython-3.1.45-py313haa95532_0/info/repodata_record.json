@@ -1,0 +1,24 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "gitdb >=4.0.1,<5",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "gitpython-3.1.45-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "6c5545d02da7c2ce89c1410d71d3d593",
+  "name": "gitpython",
+  "platform": "win32",
+  "sha256": "f1d4dad6fdd8678cef9b2d041a790704b35e4c008a6dc8df47fd9859ebc1adc4",
+  "size": 373204,
+  "subdir": "win-64",
+  "timestamp": 1761291378000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/gitpython-3.1.45-py313haa95532_0.conda",
+  "version": "3.1.45"
+}

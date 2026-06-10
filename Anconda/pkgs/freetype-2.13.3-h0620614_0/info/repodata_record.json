@@ -1,0 +1,25 @@
+{
+  "arch": "x86_64",
+  "build": "h0620614_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "libpng >=1.6.39,<1.7.0a0",
+    "vc >=14.2,<15.0a0",
+    "vs2015_runtime >=14.29.30133,<15.0a0",
+    "zlib >=1.2.13,<2.0.0a0"
+  ],
+  "fn": "freetype-2.13.3-h0620614_0.conda",
+  "license": "GPL-2.0-only or FTL",
+  "license_family": "Other",
+  "md5": "dd4baf224d4ae4e834765cdfafe7ee5b",
+  "name": "freetype",
+  "platform": "win32",
+  "sha256": "59d0ce2dd52326896e7a01ef709a3b4b5f8db8e38e4d7be4942dc4acfbb2b900",
+  "size": 567641,
+  "subdir": "win-64",
+  "timestamp": 1743636775000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/freetype-2.13.3-h0620614_0.conda",
+  "version": "2.13.3"
+}

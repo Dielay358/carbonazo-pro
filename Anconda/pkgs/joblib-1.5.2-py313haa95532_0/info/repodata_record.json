@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "joblib-1.5.2-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "97950904ad44c5e4d10d06dd15b27afd",
+  "name": "joblib",
+  "platform": "win32",
+  "sha256": "7a01b3d61ef36400616d6df2511b5b129d86daa4900fc03423b765c9ce59feaa",
+  "size": 538194,
+  "subdir": "win-64",
+  "timestamp": 1757926398000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/joblib-1.5.2-py313haa95532_0.conda",
+  "version": "1.5.2"
+}

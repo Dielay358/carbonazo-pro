@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "cachetools-5.5.1-py313haa95532_0.conda",
+  "license": "MIT",
+  "license_family": "MIT",
+  "md5": "09923cb96cc44e313d8e8c887581f017",
+  "name": "cachetools",
+  "platform": "win32",
+  "sha256": "f17924944a948c4debb0e2df92c172d9a680c6a5e1ab5a72457dc9577eb3b609",
+  "size": 36371,
+  "subdir": "win-64",
+  "timestamp": 1738224921000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/cachetools-5.5.1-py313haa95532_0.conda",
+  "version": "5.5.1"
+}

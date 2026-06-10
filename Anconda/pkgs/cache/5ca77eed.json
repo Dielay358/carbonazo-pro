@@ -1,0 +1,127 @@
+{"_mod": "Mon, 07 Jan 2019 15:22:15 GMT", "_url": "https://repo.anaconda.com/pkgs/msys2/win-64",
+  "repodata_version": 1,
+  "info": {
+    "subdir": "win-64"
+  },
+  "packages.conda": {},
+  "removed": [],
+  "packages": {
+    "msys2-conda-epoch-20160418-1.tar.bz2": {
+      "build": "1",
+      "build_number": 1,
+      "depends": [],
+      "md5": "6eaef3074f65f715ed1ca6b8a08be3aa",
+      "name": "msys2-conda-epoch",
+      "sha256": "d6a55d779052bca9accd534398b4e147d0a3dfc8f4b6528391ee9c15843784bc",
+      "size": 2065,
+      "subdir": "win-64",
+      "version": "20160418"
+    },
+    "m2-msys2-runtime-2.5.0.17080.65c939c-3.tar.bz2": {
+      "build": "3",
+      "build_number": 3,
+      "depends": [
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "GPL",
+      "md5": "9544a3c0bbd8e0038bc67522e71f1489",
+      "name": "m2-msys2-runtime",
+      "sha256": "c96b6508f062673be9fa0f3c70b8c58bc5cb17d4b32013f95f75f090b94e2cdb",
+      "size": 3123410,
+      "subdir": "win-64",
+      "version": "2.5.0.17080.65c939c"
+    },
+    "m2w64-gmp-6.1.0-2.tar.bz2": {
+      "build": "2",
+      "build_number": 2,
+      "depends": [
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "LGPL3",
+      "md5": "fec04371463ec68eb8f5752a22c5b030",
+      "name": "m2w64-gmp",
+      "sha256": "5cf23439eef17ae158d63ff3f85f77d1dca9a45b19324fdeda9e3e48ae298d18",
+      "size": 705647,
+      "subdir": "win-64",
+      "version": "6.1.0"
+    },
+    "m2w64-libwinpthread-git-5.0.0.4634.697f757-2.tar.bz2": {
+      "build": "2",
+      "build_number": 2,
+      "depends": [
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "MIT, BSD",
+      "md5": "67e61e700eb27424979778fae9293f13",
+      "name": "m2w64-libwinpthread-git",
+      "sha256": "9373b0157e08cbea09298f461d2816833281b3e22a8c9f6c5a38d7109c8a281e",
+      "size": 30543,
+      "subdir": "win-64",
+      "version": "5.0.0.4634.697f757"
+    },
+    "m2-patch-2.7.5-2.tar.bz2": {
+      "build": "2",
+      "build_number": 2,
+      "depends": [
+        "m2-msys2-runtime",
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "GPL",
+      "md5": "ce0ef50726538a9c62e8d2e957f2d85c",
+      "name": "m2-patch",
+      "sha256": "920d2d535bfceb05fb0dc7c147b665ffec4130f760b913fd3135870104fdc152",
+      "size": 90691,
+      "subdir": "win-64",
+      "version": "2.7.5"
+    },
+    "m2w64-gcc-libs-core-5.3.0-7.tar.bz2": {
+      "build": "7",
+      "build_number": 7,
+      "depends": [
+        "m2w64-gmp",
+        "m2w64-libwinpthread-git",
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "GPL3+, partial:GCCRLE, partial:LGPL2+",
+      "md5": "276d396bfe8d958f71173b7134f739fa",
+      "name": "m2w64-gcc-libs-core",
+      "sha256": "449df9debaf202928e3a0db1f059ef35b1bcb3973fa92e217ca2775f82415111",
+      "size": 217686,
+      "subdir": "win-64",
+      "version": "5.3.0"
+    },
+    "m2w64-gcc-libgfortran-5.3.0-6.tar.bz2": {
+      "build": "6",
+      "build_number": 6,
+      "depends": [
+        "m2w64-gcc-libs-core",
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "GPL, LGPL, FDL, custom",
+      "md5": "de1b7f7c8221028f6bbe103df4c53bed",
+      "name": "m2w64-gcc-libgfortran",
+      "sha256": "98f3bae3caff4c52615ddb56405dc51b39d9d2c47a9bccd130a5a19d10304245",
+      "size": 348607,
+      "subdir": "win-64",
+      "version": "5.3.0"
+    },
+    "m2w64-gcc-libs-5.3.0-7.tar.bz2": {
+      "build": "7",
+      "build_number": 7,
+      "depends": [
+        "m2w64-gcc-libgfortran",
+        "m2w64-gcc-libs-core",
+        "m2w64-gmp",
+        "m2w64-libwinpthread-git",
+        "msys2-conda-epoch >=20160418"
+      ],
+      "license": "GPL3+, partial:GCCRLE, partial:LGPL2+",
+      "md5": "0b9caac6747002340b057a222af705b2",
+      "name": "m2w64-gcc-libs",
+      "sha256": "2fb6488298a659c781f9294a743b0b376d9998a6b06aa2a3b85b49c38a85ea16",
+      "size": 530578,
+      "subdir": "win-64",
+      "version": "5.3.0"
+    }
+  }
+}

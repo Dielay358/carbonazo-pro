@@ -1,0 +1,31 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [
+    "asgiref >=3.2"
+  ],
+  "depends": [
+    "blinker >=1.9",
+    "click >=8.1.3",
+    "itsdangerous >=2.2.0",
+    "jinja2 >=3.1.2",
+    "markupsafe >=2.1.1",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "werkzeug >=3.1.0"
+  ],
+  "fn": "flask-3.1.2-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "47c6fb457277b01c05946b636083f1ff",
+  "name": "flask",
+  "platform": "win32",
+  "sha256": "202af1c42395316e753d18098080b8c394d1e008a5c78d29dee354a7d96771d7",
+  "size": 253776,
+  "subdir": "win-64",
+  "timestamp": 1756453235000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/flask-3.1.2-py313haa95532_0.conda",
+  "version": "3.1.2"
+}

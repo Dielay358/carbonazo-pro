@@ -1,0 +1,31 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "click >=8",
+    "conda >=4.14.0",
+    "conda-package-streaming >=0.7.0",
+    "filelock",
+    "jinja2",
+    "msgpack-python >=1.0.2",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "ruamel.yaml",
+    "zstandard"
+  ],
+  "fn": "conda-index-0.7.0-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "7610257cbde77d6296a253acbbbaf545",
+  "name": "conda-index",
+  "platform": "win32",
+  "sha256": "57a57f8e99736bbdb3debe062d1253fa97733a65b420cf86b15e35babe5ff802",
+  "size": 266088,
+  "subdir": "win-64",
+  "timestamp": 1761321748000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/conda-index-0.7.0-py313haa95532_0.conda",
+  "version": "0.7.0"
+}

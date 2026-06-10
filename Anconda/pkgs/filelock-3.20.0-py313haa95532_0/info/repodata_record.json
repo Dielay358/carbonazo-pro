@@ -1,0 +1,23 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [],
+  "depends": [
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313"
+  ],
+  "fn": "filelock-3.20.0-py313haa95532_0.conda",
+  "license": "Unlicense",
+  "license_family": "Public-Domain",
+  "md5": "770f70b0ddeb9aebc0b3cc40cfc00374",
+  "name": "filelock",
+  "platform": "win32",
+  "sha256": "5bf8765ac8d7bdf234d109d6256f8f7d0a33e0b9d03d512fcc08a5336cb52ee6",
+  "size": 38366,
+  "subdir": "win-64",
+  "timestamp": 1762419981000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/filelock-3.20.0-py313haa95532_0.conda",
+  "version": "3.20.0"
+}

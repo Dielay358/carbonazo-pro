@@ -1,0 +1,34 @@
+{
+  "arch": "x86_64",
+  "build": "py313haa95532_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64/",
+  "constrains": [
+    "anywidget >=0.9.0",
+    "vl-convert-python >=1.7.0",
+    "pyarrow >=11",
+    "vega_datasets >=0.9.0",
+    "pandas >=1.1.3"
+  ],
+  "depends": [
+    "jinja2",
+    "jsonschema >=3.0",
+    "narwhals >=1.14.2",
+    "packaging",
+    "python >=3.13,<3.14.0a0",
+    "python_abi 3.13.* *_cp313",
+    "typing-extensions >=4.10.0"
+  ],
+  "fn": "altair-5.5.0-py313haa95532_0.conda",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "md5": "a5cbda5b6b12be3a91f9d3e59bf455db",
+  "name": "altair",
+  "platform": "win32",
+  "sha256": "c324b9a4f3705ae58dc7cbadb83facbff2b51ff4b637609757b33e19c25a58f8",
+  "size": 894083,
+  "subdir": "win-64",
+  "timestamp": 1743017385000,
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/altair-5.5.0-py313haa95532_0.conda",
+  "version": "5.5.0"
+}
