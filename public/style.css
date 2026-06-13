@@ -1,10 +1,19 @@
+/* =========================================
+   ASADO EL CARBONAZO PRO - DNA VISUAL
+   ========================================= */
+
 :root {
     --primario: #e63946;    /* Rojo Carbonazo */
     --oscuro: #1d3557;      /* Azul profundo */
     --fondo: #f1faee;       /* Blanco hueso */
     --exito: #2a9d8f;       /* Verde venta */
+    --gris-claro: #edf2f4;
     --texto: #333;
+    --sombra: 0 4px 6px rgba(0,0,0,0.1);
 }
+
+/* 1. BASE Y ESTRUCTURA */
+* { box-sizing: border-box; }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,221 +23,34 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 header {
     background-color: var(--oscuro);
     color: white;
-    padding: 1rem 2rem;
+    padding: 0.8rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 100;
 }
 
-.logo { font-size: 1.5rem; font-weight: bold; }
+.logo { font-size: 1.4rem; font-weight: bold; }
 .logo span { color: var(--primario); }
 
-.contenedor-principal {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 10px;
-    padding: 10px;
-    flex: 1;
-    overflow: hidden;
-}
-
-/* MENÚ DE PRODUCTOS */
-.seccion-menu {
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.grid-productos {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-/* TARJETAS DE PRODUCTOS (Regla Técnica: Flexible Height) */
-.tarjeta-producto {
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.2s;
-    height: auto; 
-    border-bottom: 4px solid transparent;
-}
-
-.tarjeta-producto:active { transform: scale(0.95); }
-.tarjeta-producto:hover { border-color: var(--primario); }
-
-/* CARRITO */
-.seccion-carrito {
-    background: white;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-}
-
-.cabecera-carrito {
-    padding: 15px;
-    background: var(--oscuro);
-    color: white;
-    border-radius: 10px 10px 0 0;
-}
-
-.info-pedido { padding: 15px; display: flex; gap: 5px; }
-.info-pedido input, .info-pedido select {
-    padding: 8px; border: 1px solid #ddd; border-radius: 5px; width: 50%;
-}
-
-.lista-items { flex: 1; overflow-y: auto; padding: 15px; }
-
-.totales {
-    padding: 20px;
-    background: #f9f9f9;
-    border-top: 2px solid #eee;
-}
-
-.fila-total {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.btn-exito {
-    background-color: var(--exito);
-    color: white;
-    border: none;
-    padding: 15px;
-    width: 100%;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* Estilos para los items dentro del carrito */
-.item-carrito-lista {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-    animation: aparecer 0.3s ease;
-}
-
-@keyframes aparecer {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-.info-item { flex: 1; }
-.controles-item { display: flex; align-items: center; gap: 10px; }
-.subtotal-item { font-weight: bold; color: var(--oscuro); }
-
-.btn-eliminar {
-    background: none;
-    border: none;
-    color: var(--primario);
-    cursor: pointer;
-    font-size: 1.2rem;
-}
-
-.btn-eliminar:hover { color: #b32631; }
-
-/* Estilos del Modal */
-.modal {
-    display: none; position: fixed; z-index: 1000;
-    left: 0; top: 0; width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.7);
-}
-
-.contenido-modal {
-    background-color: white; margin: 5% auto; padding: 0;
-    width: 90%; max-width: 600px; border-radius: 15px; overflow: hidden;
-}
-
-.header-modal {
-    background: var(--oscuro); color: white; padding: 15px;
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-.tabla-contenedor { padding: 20px; max-height: 400px; overflow-y: auto; }
-
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
-th { background-color: #f2f2f2; }
-
-/* Botón Flotante */
-#btn-flotante-historial {
-    position: fixed; bottom: 20px; left: 20px;
-    width: 60px; height: 60px; border-radius: 50%;
-    background: var(--oscuro); color: white; border: none;
-    font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-/* --- CONFIGURACIÓN DE TICKET PROFESIONAL (CORREGIDA) --- */
-
-/* En la pantalla, el ticket siempre está oculto pero "existente" */
-#area-impresion {
-    display: none;
-}
-
-/* --- CONFIGURACIÓN DE TICKET PROFESIONAL --- */
-
-@page {
-    size: 80mm auto; /* Forzamos ancho de 80mm */
-    margin: 0;       /* Eliminamos márgenes físicos del papel */
-}
-
-@media print {
-    /* Ocultar todo lo que no sea el ticket */
-    header, .contenedor-principal, #btn-flotante-historial, .modal, footer {
-        display: none !important;
-    }
-
-    /* Ajuste del cuerpo para que no haya espacios en blanco */
-    body {
-        background-color: white !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    #area-impresion {
-        display: block !important;
-        width: 80mm !important;
-        padding: 4mm !important; /* Un poco de margen interno para que no pegue al borde */
-        margin: 0 auto !important; /* Centrado en el rollo */
-        background-color: white !important;
-        color: black !important;
-        font-family: 'Courier New', Courier, monospace;
-        box-sizing: border-box; /* Asegura que el padding no ensanche los 80mm */
-    }
-
-    /* Mejoramos el tamaño de letra para que se vea más grande en el papel térmico */
-    .ticket-header h3 { font-size: 1.5rem; }
-    .ticket-header p { font-size: 1rem; }
-    .ticket-fila { font-size: 1.1rem; }
-    .ticket-total { font-size: 1.4rem; }
-}
-
+/* 2. SELECTOR DE USUARIO */
 .usuario-selector {
     background: rgba(255,255,255,0.1);
-    padding: 5px 15px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 30px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
 }
+
 .usuario-selector select {
     background: none;
     color: white;
@@ -237,4 +59,234 @@ th { background-color: #f2f2f2; }
     font-weight: bold;
     cursor: pointer;
 }
-.usuario-selector select option { color: black; }
+
+/* 3. MAPA DE MESAS */
+.mapa-mesas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #ced4da;
+    justify-content: center;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mesa-btn {
+    width: 75px;
+    height: 55px;
+    border: none;
+    border-radius: 8px;
+    background-color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: var(--sombra);
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.mesa-btn.ocupada { background-color: var(--primario); color: white; }
+.mesa-btn.seleccionada { border: 3px solid var(--oscuro); transform: scale(1.05); }
+.mesa-btn:active { transform: scale(0.95); }
+
+/* 4. LAYOUT PRINCIPAL */
+.contenedor-principal {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 10px;
+    padding: 10px;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 5. MENÚ Y CATEGORÍAS */
+.seccion-menu {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.buscador {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: var(--sombra);
+}
+
+.buscador input {
+    border: none;
+    outline: none;
+    width: 100%;
+    margin-left: 10px;
+    font-size: 1rem;
+}
+
+.filtros-categoria {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    padding: 5px 0;
+}
+
+.btn-filtro {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: var(--sombra);
+    font-weight: 600;
+}
+
+.btn-filtro:hover { background: var(--oscuro); color: white; }
+
+.grid-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.tarjeta-producto {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: 0.2s;
+    border-bottom: 4px solid transparent;
+}
+
+.tarjeta-producto:hover { border-color: var(--primario); transform: translateY(-3px); }
+
+/* 6. CARRITO */
+.seccion-carrito {
+    background: white;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -3px 0 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.cabecera-carrito {
+    padding: 15px;
+    background: var(--oscuro);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lista-items { flex: 1; overflow-y: auto; padding: 15px; }
+
+.item-carrito-lista {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gris-claro);
+    animation: aparecer 0.2s ease;
+}
+
+@keyframes aparecer { from { opacity: 0; transform: translateX(10px); } }
+
+/* 7. BOTONES ACCIÓN CARRITO */
+.totales { padding: 15px; background: var(--gris-claro); }
+
+.botones-accion-carrito {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-exito, .btn-secundario {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-exito { background: var(--exito); color: white; }
+.btn-secundario { background: var(--oscuro); color: white; }
+
+/* 8. MODALES */
+.modal {
+    display: none; position: fixed; z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
+}
+
+.contenido-modal {
+    background-color: white; margin: 3% auto;
+    width: 90%; max-width: 650px; border-radius: 15px;
+    overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.header-modal {
+    background: var(--oscuro); color: white; padding: 15px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.btn-cerrar { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+/* 9. BOTONES FLOTANTES */
+.botones-flotantes {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-flotante {
+    width: 55px; height: 55px; border-radius: 50%;
+    border: none; color: white; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 1.2rem; transition: 0.3s;
+}
+
+.btn-flotante.dark { background: var(--oscuro); }
+.btn-flotante.gray { background: #6c757d; }
+.btn-flotante.green { background: var(--exito); }
+.btn-flotante:hover { transform: scale(1.1); }
+
+/* 10. CONFIGURACIÓN DE IMPRESIÓN 80mm */
+#area-impresion { display: none; }
+
+@page { size: 80mm auto; margin: 0; }
+
+@media print {
+    body * { visibility: hidden; }
+    #area-impresion, #area-impresion * { visibility: visible; }
+    #area-impresion {
+        display: block !important;
+        position: absolute; left: 0; top: 0;
+        width: 80mm; padding: 4mm;
+        font-family: 'Courier New', Courier, monospace;
+        background: white; color: black;
+    }
+    .ticket-header { text-align: center; margin-bottom: 5px; }
+    .ticket-divisor { border-top: 1px dashed black; margin: 5px 0; }
+    .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .ticket-total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 10px; }
+}
+
+/* 11. UTILIDADES FORMULARIOS */
+.form-edit, .form-agregar-producto { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.inputs-inline { display: flex; gap: 5px; flex-wrap: wrap; }
+.inputs-inline input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 80px; }

@@ -68,6 +68,16 @@ const initDB = async () => {
             id ${idType}, nombre TEXT UNIQUE, pin TEXT
         )`);
 
+        // --- DENTRO DE initDB(), después de la tabla Usuarios ---
+await db.query(`CREATE TABLE IF NOT EXISTS Mesas_Abiertas (
+    id ${idType},
+    mesa TEXT UNIQUE,
+    items TEXT, 
+    mesero TEXT,
+    total_actual REAL,
+    fecha_apertura TEXT
+)`);
+
         // Carga inicial de datos (solo si están vacías)
         const prodCheck = await db.query("SELECT COUNT(*) as count FROM Productos");
         if (parseInt(usesCloud ? prodCheck.rows[0].count : prodCheck.rows[0].count) === 0) {
@@ -183,6 +193,41 @@ app.get('/exportar-excel', async (req, res) => {
             csv += `${v.id},"${v.fecha}",${v.total},"${v.mesero}","${v.mesa}","${v.tipo_pedido}"\n`;
         });
         res.setHeader('Content-Type', 'text/csv').send(csv);
+    } catch (err) { res.status(500).send(err.message); }
+});
+
+// --- RUTA: GUARDAR/ACTUALIZAR MESA ABIERTA ---
+app.post('/guardar-mesa', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    const { mesa, items, mesero, total_actual } = req.body;
+    const fecha = new Date().toLocaleString();
+    
+    try {
+        // Usamos ON CONFLICT para actualizar si la mesa ya existe o insertar si es nueva
+        const q = `
+            INSERT INTO Mesas_Abiertas (mesa, items, mesero, total_actual, fecha_apertura)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (mesa) 
+            DO UPDATE SET items = EXCLUDED.items, total_actual = EXCLUDED.total_actual, mesero = EXCLUDED.mesero;
+        `;
+        await db.query(q, [mesa, JSON.stringify(items), mesero, total_actual, fecha]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).send(err.message); }
+});
+
+// --- RUTA: OBTENER TODAS LAS MESAS ABIERTAS ---
+app.get('/mesas-abiertas', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM Mesas_Abiertas");
+        res.json(result.rows);
+    } catch (err) { res.status(500).send(err.message); }
+});
+
+// --- RUTA: ELIMINAR MESA (AL COBRAR) ---
+app.delete('/limpiar-mesa/:mesa', async (req, res) => {
+    try {
+        await db.query("DELETE FROM Mesas_Abiertas WHERE mesa = $1", [req.params.mesa]);
+        res.json({ success: true });
     } catch (err) { res.status(500).send(err.message); }
 });
 
