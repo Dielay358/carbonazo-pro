@@ -389,3 +389,18 @@ header {
     font-weight: bold;
     font-size: 0.85rem;
 }
+
+.btn-pago {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.btn-pago:active { transform: scale(0.95); }

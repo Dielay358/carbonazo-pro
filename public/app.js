@@ -13,6 +13,7 @@ let usuarioLogueado = null;
 let mesaSeleccionada = null; // Ej: "Mesa 1"
 let subCuentaActiva = null;  // Ej: "Mesa 1 - Diego"
 let mesasAbiertas = [];
+let totalVentaSinPropina = 0;
 
 // ELEMENTOS DEL DOM
 const contenedorMenu = document.getElementById('contenedor-menu');
@@ -218,13 +219,42 @@ function imprimirComanda(mesa, items) {
 }
 
 // 6. COBRO Y CIERRE
-async function finalizarVenta() {
-    if (carrito.length === 0) return alert("Carrito vacío");
-    const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+// 1. Abrir el modal de pago
+function finalizarVenta() {
+    if (carrito.length === 0) return alert("El carrito está vacío");
+    
+    totalVentaSinPropina = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    const propinaSugerida = totalVentaSinPropina * 0.10; // 10% Nicaragua
+
+    document.getElementById('pago-subtotal').innerText = `C$ ${totalVentaSinPropina.toFixed(2)}`;
+    document.getElementById('input-propina').value = propinaSugerida.toFixed(2);
+    
+    actualizarTotalConPropina();
+    document.getElementById('modal-metodo-pago').style.display = 'block';
+    
+    // Escuchar cambios en la propina por si el cliente quiere dar más o menos
+    document.getElementById('input-propina').oninput = actualizarTotalConPropina;
+}
+
+function actualizarTotalConPropina() {
+    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
+    const totalFinal = totalVentaSinPropina + propina;
+    document.getElementById('pago-total-final').innerText = `C$ ${totalFinal.toFixed(2)}`;
+}
+
+// 2. Ejecutar la venta real después de elegir método de pago
+async function confirmarVentaFinal(metodo) {
+    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
+    const totalFinal = totalVentaSinPropina + propina;
 
     const datosVenta = { 
-        total, mesero: usuarioLogueado, tipo_pedido: document.getElementById('tipo-pedido').value,
-        mesa: subCuentaActiva, cliente: subCuentaActiva, metodo_pago: "Efectivo"
+        total: totalFinal, 
+        propina: propina,
+        mesero: usuarioLogueado, 
+        tipo_pedido: document.getElementById('tipo-pedido').value,
+        mesa: subCuentaActiva || "Barra", 
+        cliente: subCuentaActiva || "General", 
+        metodo_pago: metodo 
     };
 
     try {
@@ -233,19 +263,48 @@ async function finalizarVenta() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
             body: JSON.stringify(datosVenta)
         });
-        const result = await res.json();
         
-        if (result.success) {
+        if (res.ok) {
             reproducirSonido('exito');
-            // Borrar de mesas abiertas
-            await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
-            generarTicket(result.idVenta, datosVenta);
+            if (subCuentaActiva) await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
             
+            cerrarModalPago();
+            generarTicketPro(datosVenta); // Ticket actualizado con propina
             limpiarPantallaPostAccion();
             await refrescarMesas();
         }
     } catch (e) { alert("Error al procesar pago"); }
 }
+
+function cerrarModalPago() { document.getElementById('modal-metodo-pago').style.display = 'none'; }
+
+// 3. Ticket actualizado con desglose de propina
+function generarTicketPro(datos) {
+    const area = document.getElementById('area-impresion');
+    const subtotal = datos.total - datos.propina;
+    
+    let itemsHtml = carrito.map(i => `<div class="ticket-fila"><span>${i.cantidad} x ${i.nombre}</span><span>C$ ${(i.precio * i.cantidad).toFixed(2)}</span></div>`).join('');
+    
+    area.innerHTML = `
+        <div class="ticket-header"><h3>EL CARBONAZO</h3><p>Ticket de Venta</p><p>${new Date().toLocaleString()}</p></div>
+        <div class="ticket-divisor"></div>
+        <div class="ticket-fila"><strong>Mesa:</strong><span>${datos.mesa}</span></div>
+        <div class="ticket-divisor"></div>
+        ${itemsHtml}
+        <div class="ticket-divisor"></div>
+        <div class="ticket-fila"><span>Subtotal:</span><span>C$ ${subtotal.toFixed(2)}</span></div>
+        <div class="ticket-fila"><span>Propina Vol. (10%):</span><span>C$ ${datos.propina.toFixed(2)}</span></div>
+        <div class="ticket-total">TOTAL: C$ ${datos.total.toFixed(2)}</div>
+        <div class="ticket-divisor"></div>
+        <div class="ticket-header">
+            <p>Método de Pago: ${datos.metodo_pago}</p>
+            <p>Atendido por: ${datos.mesero}</p>
+            <p>¡Gracias por su preferencia!</p>
+        </div>
+    `;
+    setTimeout(() => { window.print(); }, 300);
+}
+
 
 // 7. UTILIDADES GENERALES
 function limpiarPantallaPostAccion() {

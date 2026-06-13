@@ -238,5 +238,36 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Finalizar Pago -->
+<div id="modal-metodo-pago" class="modal">
+    <div class="contenido-modal" style="max-width: 400px;">
+        <header class="header-modal">
+            <h2>Finalizar Cuenta</h2>
+            <button onclick="cerrarModalPago()" class="btn-cerrar">&times;</button>
+        </header>
+        <div style="padding: 20px; text-align: center;">
+            <p style="margin:0; color: #666;">Subtotal: <span id="pago-subtotal">C$ 0.00</span></p>
+            <div style="background: #f1faee; padding: 10px; border-radius: 10px; margin: 10px 0;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Propina Sugerida (10%):</label>
+                <input type="number" id="input-propina" style="width: 120px; font-size: 1.2rem; text-align: center; border: 1px solid var(--exito); border-radius: 5px;">
+            </div>
+            <h1 id="pago-total-final" style="color: var(--oscuro); margin: 10px 0;">C$ 0.00</h1>
+            
+            <p>Seleccione Método de Pago:</p>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                <button onclick="confirmarVentaFinal('Efectivo')" class="btn-pago" style="background: #2a9d8f; color:white;">
+                    <i class="fas fa-money-bill-wave"></i> EFECTIVO
+                </button>
+                <button onclick="confirmarVentaFinal('Tarjeta')" class="btn-pago" style="background: #457b9d; color:white;">
+                    <i class="fas fa-credit-card"></i> TARJETA
+                </button>
+                <button onclick="confirmarVentaFinal('Transferencia')" class="btn-pago" style="background: #1d3557; color:white;">
+                    <i class="fas fa-university"></i> TRANSFERENCIA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

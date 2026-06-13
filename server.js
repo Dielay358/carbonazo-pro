@@ -53,10 +53,10 @@ const initDB = async () => {
     const idType = usesCloud ? "SERIAL PRIMARY KEY" : "INTEGER PRIMARY KEY AUTOINCREMENT";
     
     try {
-        // 1. Ventas
-        await db.query(`CREATE TABLE IF NOT EXISTS Ventas (
-            id ${idType}, fecha TEXT, total REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT
-        )`);
+        // --- 1. En initDB, asegúrate que Ventas tenga propina ---
+await db.query(`CREATE TABLE IF NOT EXISTS Ventas (
+    id ${idType}, fecha TEXT, total REAL, propina REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT
+)`);
 
         // 2. Productos
         await db.query(`CREATE TABLE IF NOT EXISTS Productos (
@@ -144,14 +144,14 @@ app.delete('/borrar-producto/:id', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-// 5. Registrar Venta
+// --- 2. Actualiza la ruta /nueva-venta ---
 app.post('/nueva-venta', async (req, res) => {
     if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
-    const { total, mesero, tipo_pedido, mesa, cliente, metodo_pago } = req.body;
+    const { total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago } = req.body;
     const fecha = new Date().toLocaleString();
     try {
-        const q = `INSERT INTO Ventas (fecha, total, mesero, tipo_pedido, mesa, cliente, metodo_pago) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
-        const result = await db.query(q, [fecha, total, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago]);
+        const q = `INSERT INTO Ventas (fecha, total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+        const result = await db.query(q, [fecha, total, propina, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago]);
         res.json({ success: true, idVenta: usesCloud ? "Nube" : result.lastID });
     } catch (err) { res.status(500).send(err.message); }
 });
@@ -173,12 +173,12 @@ app.get('/usuarios', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-// 8. Cierre de Caja
+// --- 3. Actualiza el Reporte de Cierre (Agrupado por Método de Pago) ---
 app.get('/reporte-cierre', async (req, res) => {
     if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const hoy = `%${new Date().toLocaleDateString()}%`;
     try {
-        const q = `SELECT mesero, SUM(total) as totalVendido, COUNT(id) as cantidadVentas FROM Ventas WHERE fecha LIKE $1 GROUP BY mesero`;
+        const q = `SELECT metodo_pago, SUM(total) as totalVendido, SUM(propina) as totalPropina FROM Ventas WHERE fecha LIKE $1 GROUP BY metodo_pago`;
         const result = await db.query(q, [hoy]);
         res.json(result.rows);
     } catch (err) { res.status(500).send(err.message); }
