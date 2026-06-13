@@ -1,12 +1,6 @@
-/**
- * PROYECTO: ASADO EL CARBONAZO PRO (EDICIÓN NUBE)
- * DNA: Node.js + PostgreSQL (Cloud) / SQLite3 (Local)
- */
-
 require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg'); // Para Supabase
-const sqlite3 = require('sqlite3').verbose(); // Para Local
+const { Pool } = require('pg'); 
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const sanitizeHtml = require('sanitize-html');
@@ -25,19 +19,19 @@ let db;
 const usesCloud = process.env.DATABASE_URL;
 
 if (usesCloud) {
-    // CONEXIÓN NUBE (PostgreSQL)
+    // CONEXIÓN NUBE (PostgreSQL) - Aquí NO cargamos sqlite3
     db = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
-    console.log("☁️ Conectado a Supabase (PostgreSQL)");
+    console.log("☁️ MODO NUBE: Conectado a Supabase");
 } else {
-    // CONEXIÓN LOCAL (SQLite)
+    // CONEXIÓN LOCAL (SQLite) - Solo aquí cargamos sqlite3
+    const sqlite3 = require('sqlite3').verbose(); 
     const localDB = new sqlite3.Database('./carbonazo.db');
-    // Creamos un "puente" para que SQLite use la misma sintaxis que PostgreSQL ($1, $2...)
     db = {
         query: (text, params = []) => new Promise((resolve, reject) => {
-            const sql = text.replace(/\$\d+/g, '?'); // Cambia $1 por ?
+            const sql = text.replace(/\$\d+/g, '?'); 
             if (text.trim().startsWith("SELECT")) {
                 localDB.all(sql, params, (err, rows) => {
                     if (err) reject(err); else resolve({ rows });
@@ -49,8 +43,9 @@ if (usesCloud) {
             }
         })
     };
-    console.log("🏠 Conectado a SQLite Local");
+    console.log("🏠 MODO LOCAL: Conectado a SQLite");
 }
+
 
 // --- INICIALIZACIÓN DE TABLAS ---
 const initDB = async () => {
