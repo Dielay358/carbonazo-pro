@@ -71,22 +71,35 @@ async function intentarLogin() {
     } catch (e) { alert("Error de conexión"); }
 }
 
-// 4. MANEJO DE MESAS Y CUENTAS SEPARADAS
 function dibujarMapaMesas() {
     const contenedor = document.getElementById('contenedor-mesas');
     contenedor.innerHTML = '';
 
     for (let i = 1; i <= 10; i++) {
         const idMesaBase = `Mesa ${i}`;
-        // Buscamos si hay cuentas para esta mesa
+        // Buscamos todas las cuentas que pertenezcan a esta mesa base (ej: "Mesa 1", "Mesa 1 - Diego")
         const cuentasEnMesa = mesasAbiertas.filter(m => m.mesa.startsWith(idMesaBase));
         
         const btn = document.createElement('button');
         btn.className = `mesa-btn ${cuentasEnMesa.length > 0 ? 'ocupada' : ''} ${mesaSeleccionada === idMesaBase ? 'seleccionada' : ''}`;
         
-        // Si hay varias cuentas, mostramos el número
+        // Calculamos el total sumado de todas las sub-cuentas
+        const granTotalMesa = cuentasEnMesa.reduce((acc, c) => acc + parseFloat(c.total_actual), 0);
+        
+        // Info principal del botón
         const infoCuentas = cuentasEnMesa.length > 1 ? ` (${cuentasEnMesa.length})` : '';
         btn.innerHTML = `<i class="fas fa-utensils"></i><br>${idMesaBase}${infoCuentas}`;
+        
+        // --- NUEVO: Agregar el Popup de Info Rápida ---
+        if (cuentasEnMesa.length > 0) {
+            const popup = document.createElement('div');
+            popup.className = 'mesa-info-flotante';
+            popup.innerHTML = `
+                Cuentas: ${cuentasEnMesa.length}<br>
+                Total: <span>C$ ${granTotalMesa.toFixed(2)}</span>
+            `;
+            btn.appendChild(popup);
+        }
         
         btn.onclick = () => abrirSelectorDeCuenta(idMesaBase);
         contenedor.appendChild(btn);
