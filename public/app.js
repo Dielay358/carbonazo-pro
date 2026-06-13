@@ -93,31 +93,42 @@ function dibujarMapaMesas() {
     }
 }
 
+// 1. REEMPLAZAR: Abrir selector visual en lugar de prompt
 async function abrirSelectorDeCuenta(idMesaBase) {
     reproducirSonido('click');
     const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idMesaBase));
 
     if (cuentas.length === 0) {
-        // Mesa libre: Abrir cuenta normal
         seleccionarCuentaDirecta(idMesaBase);
     } else {
-        // Mesa ocupada: Preguntar qué cuenta abrir o si crear una nueva
-        let mensaje = `Mesa ${idMesaBase} tiene cuentas activas:\n\n`;
-        cuentas.forEach((c, index) => mensaje += `${index + 1}. ${c.mesa}\n`);
-        mensaje += `\nEscriba el NÚMERO para abrir, o deje VACÍO para crear CUENTA NUEVA separada.`;
+        // Mostrar Modal en lugar de Prompt
+        mesaSeleccionada = idMesaBase;
+        document.getElementById('titulo-selector-mesa').innerText = `Cuentas en ${idMesaBase}`;
+        const contenedor = document.getElementById('lista-cuentas-mesa');
+        
+        contenedor.innerHTML = cuentas.map(c => `
+            <div class="btn-cuenta-card" onclick="seleccionarCuentaDirecta('${c.mesa}')">
+                <div>
+                    <strong>${c.mesa.split(' - ')[1] || 'Cuenta Principal'}</strong><br>
+                    <small>Mesero: ${c.mesero}</small>
+                </div>
+                <span>C$ ${parseFloat(c.total_actual).toFixed(2)}</span>
+            </div>
+        `).join('');
+        
+        document.getElementById('modal-selector-cuentas').style.display = 'block';
+    }
+}
 
-        const opcion = prompt(mensaje);
-        if (opcion === null) return; // Canceló
+function cerrarSelectorCuentas() {
+    document.getElementById('modal-selector-cuentas').style.display = 'none';
+}
 
-        if (opcion === "") {
-            const nombreNuevo = prompt("Nombre para la nueva cuenta separada (Ej: Diego):");
-            seleccionarCuentaDirecta(`${idMesaBase} - ${nombreNuevo || 'Extra'}`);
-        } else {
-            const index = parseInt(opcion) - 1;
-            if (cuentas[index]) {
-                seleccionarCuentaDirecta(cuentas[index].mesa);
-            }
-        }
+function prepararNuevaSubCuenta() {
+    const nombre = prompt("Nombre para la cuenta (Ej: Diego, Familia Perez):");
+    if (nombre) {
+        cerrarSelectorCuentas();
+        seleccionarCuentaDirecta(`${mesaSeleccionada} - ${nombre}`);
     }
 }
 
@@ -133,6 +144,21 @@ function seleccionarCuentaDirecta(nombreCompleto) {
     
     actualizarInterfazCarrito();
     dibujarMapaMesas();
+}
+
+// 2. NUEVA FUNCIÓN: Anular cuenta (Borrar sin cobrar)
+async function anularCuentaActual() {
+    if (!subCuentaActiva) return;
+    
+    if (confirm(`⚠️ ¿Desea ELIMINAR permanentemente la cuenta "${subCuentaActiva}"? Esta acción no se puede deshacer.`)) {
+        try {
+            await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
+            reproducirSonido('click');
+            limpiarPantallaPostAccion();
+            await refrescarMesas();
+            alert("Cuenta eliminada.");
+        } catch (e) { alert("Error al eliminar"); }
+    }
 }
 
 // 5. COMANDAS Y GUARDADO

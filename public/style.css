@@ -312,3 +312,27 @@ header {
     text-transform: uppercase;
 }
 .ticket-comanda h2 { font-size: 1.5rem; text-align: center; border: 2px solid black; }
+
+.btn-cuenta-card {
+    background: var(--gris-claro);
+    border: 2px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn-cuenta-card:hover { border-color: var(--primario); background: white; }
+.btn-cuenta-card strong { color: var(--oscuro); font-size: 1.1rem; }
+.btn-cuenta-card span { color: var(--exito); font-weight: bold; }
+
+/* Botón de Anular */
+.btn-anular {
+    background-color: #ffb703; /* Naranja advertencia */
+    color: var(--oscuro);
+    padding: 15px; border: none; border-radius: 10px;
+    font-weight: bold; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}

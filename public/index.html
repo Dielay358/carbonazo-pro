@@ -96,17 +96,19 @@
                     <span id="total-monto">C$ 0.00</span>
                 </div>
                 
-                <div class="botones-accion-carrito">
-                    <!-- BOTÓN GUARDAR (NUEVO) -->
-                    <button id="btn-guardar-mesa" onclick="guardarPedidoTemporal()" class="btn-secundario">
-                        <i class="fas fa-save"></i> PENDIENTE
-                    </button>
-                    
-                    <!-- BOTÓN FINALIZAR -->
-                    <button id="btn-cobrar" class="btn-exito">
-                        <i class="fas fa-check-circle"></i> COBRAR
-                    </button>
-                </div>
+                <div class="botones-accion-carrito" style="grid-template-columns: 1fr 1fr 1fr;"> <!-- Cambiado a 3 columnas -->
+    <button onclick="guardarPedidoTemporal()" class="btn-secundario" title="Guardar">
+        <i class="fas fa-save"></i>
+    </button>
+    
+    <button onclick="anularCuentaActual()" class="btn-anular" title="Anular Cuenta">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+
+    <button id="btn-cobrar" class="btn-exito" title="Cobrar e Imprimir">
+        <i class="fas fa-check-circle"></i>
+    </button>
+</div>
             </div>
         </section>
     </main>
@@ -218,5 +220,23 @@
 
     <!-- LÓGICA PRINCIPAL -->
     <script src="app.js"></script>
+
+    <!-- Modal Selector de Cuentas (Sub-mesas) -->
+<div id="modal-selector-cuentas" class="modal">
+    <div class="contenido-modal" style="max-width: 400px;">
+        <header class="header-modal">
+            <h2 id="titulo-selector-mesa">Mesa X</h2>
+            <button onclick="cerrarSelectorCuentas()" class="btn-cerrar">&times;</button>
+        </header>
+        <div id="lista-cuentas-mesa" style="padding: 20px; display: grid; gap: 10px;">
+            <!-- Aquí aparecerán botones para las cuentas existentes -->
+        </div>
+        <div style="padding: 15px; border-top: 1px solid #eee;">
+            <button onclick="prepararNuevaSubCuenta()" class="btn-secundario" style="width: 100%;">
+                <i class="fas fa-plus-circle"></i> NUEVA CUENTA SEPARADA
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
