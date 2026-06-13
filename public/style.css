@@ -290,3 +290,25 @@ header {
 .form-edit, .form-agregar-producto { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
 .inputs-inline { display: flex; gap: 5px; flex-wrap: wrap; }
 .inputs-inline input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 80px; }
+
+/* Pantalla de Bloqueo */
+.login-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--oscuro); z-index: 2000;
+    display: flex; justify-content: center; align-items: center;
+}
+.login-box {
+    background: white; padding: 30px; border-radius: 20px;
+    text-align: center; width: 90%; max-width: 350px;
+}
+.login-box input, .login-box select {
+    width: 100%; padding: 15px; margin: 10px 0;
+    border: 1px solid #ddd; border-radius: 10px; font-size: 1.2rem; text-align: center;
+}
+
+/* Estilo para Comanda (Ticket de Cocina) */
+.ticket-comanda {
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: uppercase;
+}
+.ticket-comanda h2 { font-size: 1.5rem; text-align: center; border: 2px solid black; }

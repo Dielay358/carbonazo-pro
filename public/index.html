@@ -10,6 +10,25 @@
 </head>
 <body>
 
+<!-- Pantalla de Bloqueo por PIN -->
+<div id="pantalla-login" class="login-overlay">
+    <div class="login-box">
+        <i class="fas fa-fire" style="font-size: 3rem; color: var(--primario);"></i>
+        <h2>El Carbonazo PRO</h2>
+        <p>Seleccione su nombre e ingrese PIN</p>
+        
+        <select id="login-usuario">
+            <!-- Se llena con los usuarios de la DB -->
+        </select>
+        
+        <input type="password" id="login-pin" maxlength="4" placeholder="****" inputmode="numeric">
+        
+        <button onclick="intentarLogin()" class="btn-exito" style="margin-top: 15px;">
+            <i class="fas fa-unlock"></i> ENTRAR
+        </button>
+    </div>
+</div>
+
     <!-- ENCABEZADO -->
     <header>
         <div class="logo">
