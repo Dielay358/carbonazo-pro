@@ -231,6 +231,26 @@ app.delete('/limpiar-mesa/:mesa', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
+// --- RUTA: VALIDACIÓN DE PIN (LOGIN) ---
+app.post('/login', async (req, res) => {
+    const { nombre, pin } = req.body;
+    try {
+        // Buscamos al usuario por nombre y pin
+        const result = await db.query("SELECT * FROM Usuarios WHERE nombre = $1 AND pin = $2", [nombre, pin]);
+        
+        if (result.rows.length > 0) {
+            // Login exitoso
+            res.json({ success: true, usuario: result.rows[0].nombre });
+        } else {
+            // PIN incorrecto
+            res.status(401).json({ success: false, message: "PIN incorrecto" });
+        }
+    } catch (err) {
+        console.error("Error en login:", err.message);
+        res.status(500).send("Error en el servidor");
+    }
+});
+
 // --- INICIO ---
 app.listen(PORT, () => {
     console.log(`-------------------------------------------------`);
