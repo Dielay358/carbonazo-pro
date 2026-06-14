@@ -13,6 +13,7 @@ let mesaSeleccionada = null;
 let subCuentaActiva = null;
 let mesasAbiertas = [];
 let totalVentaSinPropina = 0;
+let tasaCambio = 36.62;
 
 const contenedorMenu = document.getElementById('contenedor-menu');
 const listaCarrito = document.getElementById('items-carrito');
@@ -223,9 +224,76 @@ function finalizarVenta() {
     document.getElementById('modal-metodo-pago').style.display = 'block';
 }
 
+// --- LÓGICA MULTIMONEDA ---
+async function cargarTasaCambio() {
+    const res = await fetch(`${URL_SERVIDOR}/tasa-cambio`);
+    const data = await res.json();
+    tasaCambio = parseFloat(data.tasa);
+    document.getElementById('header-tasa').innerText = tasaCambio.toFixed(2);
+    document.getElementById('input-tasa-cambio').value = tasaCambio;
+}
+
+async function guardarTasaCambio() {
+    const nuevaTasa = document.getElementById('input-tasa-cambio').value;
+    await fetch(`${URL_SERVIDOR}/tasa-cambio`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasa: nuevaTasa })
+    });
+    alert("Tasa actualizada 🇳🇮");
+    await cargarTasaCambio();
+}
+
 function actualizarTotalConPropina() {
     const p = parseFloat(document.getElementById('input-propina').value) || 0;
-    document.getElementById('pago-total-final').innerText = `C$ ${(totalVentaSinPropina + p).toFixed(2)}`;
+    const totalNIO = totalVentaSinPropina + p;
+    const totalUSD = totalNIO / tasaCambio; // Conversión a Dólar Nic
+
+    document.getElementById('pago-total-final').innerText = `C$ ${totalNIO.toFixed(2)}`;
+    document.getElementById('pago-total-usd').innerText = `$ ${totalUSD.toFixed(2)}`;
+}
+
+// --- GESTIÓN DE PERSONAL ---
+async function guardarNuevoUsuario() {
+    const nombre = document.getElementById('nuevo-user-nombre').value;
+    const pin = document.getElementById('nuevo-user-pin').value;
+    await fetch(`${URL_SERVIDOR}/usuarios-admin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, pin })
+    });
+    document.getElementById('nuevo-user-nombre').value = '';
+    document.getElementById('nuevo-user-pin').value = '';
+    renderizarAdminUsuarios();
+}
+
+async function renderizarAdminUsuarios() {
+    const res = await fetch(`${URL_SERVIDOR}/usuarios`);
+    const users = await res.json();
+    document.getElementById('tabla-admin-usuarios').innerHTML = users.map(u => `
+        <tr>
+            <td><i class="fas fa-user"></i> ${u.nombre}</td>
+            <td style="text-align:right;">
+                <button onclick="borrarUsuario(${u.id})" style="color:red; background:none; border:none;"><i class="fas fa-user-minus"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function borrarUsuario(id) {
+    if(confirm("¿Eliminar mesero?")) {
+        await fetch(`${URL_SERVIDOR}/usuarios-admin/${id}`, { method: 'DELETE' });
+        renderizarAdminUsuarios();
+    }
+}
+
+// Navegación de pestañas en Admin
+function cambiarTabAdmin(tab) {
+    document.getElementById('cuerpo-tabla-admin').parentElement.style.display = (tab === 'prods') ? 'table' : 'none';
+    document.querySelector('.form-agregar-producto').style.display = (tab === 'prods') ? 'block' : 'none';
+    document.getElementById('tab-users').style.display = (tab === 'users') ? 'block' : 'none';
+    document.getElementById('tab-config').style.display = (tab === 'config') ? 'block' : 'none';
+    if(tab === 'users') renderizarAdminUsuarios();
 }
 
 async function confirmarVentaFinal(metodo) {

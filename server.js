@@ -158,4 +158,36 @@ app.delete('/limpiar-mesa/:mesa', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
+// --- RUTA: OBTENER/GUARDAR TASA DE CAMBIO ---
+app.get('/tasa-cambio', async (req, res) => {
+    try {
+        const result = await db.query("SELECT valor FROM Configuracion WHERE llave = 'tasa_cambio'");
+        res.json({ tasa: result.rows[0]?.valor || 36.62 }); // 36.62 es el estándar actual aprox.
+    } catch (e) { res.json({ tasa: 36.62 }); }
+});
+
+app.post('/tasa-cambio', async (req, res) => {
+    const { tasa } = req.body;
+    try {
+        await db.query("INSERT INTO Configuracion (llave, valor) VALUES ('tasa_cambio', $1) ON CONFLICT (llave) DO UPDATE SET valor = EXCLUDED.valor", [tasa]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+// --- RUTA: GESTIÓN DE MESEROS (CRUD) ---
+app.post('/usuarios-admin', async (req, res) => {
+    const { nombre, pin } = req.body;
+    try {
+        await db.query("INSERT INTO Usuarios (nombre, pin) VALUES ($1, $2)", [nombre, pin]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+app.delete('/usuarios-admin/:id', async (req, res) => {
+    try {
+        await db.query("DELETE FROM Usuarios WHERE id = $1", [req.params.id]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
 app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
