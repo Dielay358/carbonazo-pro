@@ -14,7 +14,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- CONEXIÓN HÍBRIDA ---
 let db;
 const usesCloud = process.env.DATABASE_URL;
 
@@ -37,29 +36,23 @@ if (usesCloud) {
     console.log("🏠 MODO LOCAL: SQLite");
 }
 
-// --- INICIALIZACIÓN Y AUTO-PARCHE DE TABLAS ---
 const initDB = async () => {
     const idType = usesCloud ? "SERIAL PRIMARY KEY" : "INTEGER PRIMARY KEY AUTOINCREMENT";
     try {
-        await db.query(`CREATE TABLE IF NOT EXISTS Ventas (id ${idType}, fecha TEXT, total REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT)`);
+        await db.query(`CREATE TABLE IF NOT EXISTS Ventas (id ${idType}, fecha TEXT, total REAL, propina REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT)`);
         await db.query(`CREATE TABLE IF NOT EXISTS Productos (id ${idType}, nombre TEXT, precio REAL, icono TEXT, categoria TEXT)`);
         await db.query(`CREATE TABLE IF NOT EXISTS Usuarios (id ${idType}, nombre TEXT UNIQUE, pin TEXT)`);
         await db.query(`CREATE TABLE IF NOT EXISTS Mesas_Abiertas (id ${idType}, mesa TEXT UNIQUE, items TEXT, mesero TEXT, total_actual REAL, fecha_apertura TEXT)`);
+        await db.query(`CREATE TABLE IF NOT EXISTS Configuracion (llave TEXT PRIMARY KEY, valor TEXT)`);
 
-        // Parche para agregar columna 'propina' si no existe
-        try { await db.query(`ALTER TABLE Ventas ADD COLUMN propina REAL DEFAULT 0`); } catch (e) { /* Ya existe */ }
-
-        // Datos iniciales
         const userCheck = await db.query("SELECT COUNT(*) as count FROM Usuarios");
         if (parseInt(userCheck.rows[0].count) === 0) {
             await db.query("INSERT INTO Usuarios (nombre, pin) VALUES ($1, $2)", ["Admin", "3589"]);
         }
-        console.log("✅ Tablas listas y sincronizadas.");
+        console.log("✅ Base de Datos Sincronizada.");
     } catch (err) { console.error("❌ Error DB:", err.message); }
 };
 initDB();
-
-// --- RUTAS API ---
 
 app.post('/login', async (req, res) => {
     const { nombre, pin } = req.body;
@@ -78,6 +71,7 @@ app.get('/productos', async (req, res) => {
 });
 
 app.post('/agregar-producto', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const { nombre, precio, icono, categoria } = req.body;
     try {
         await db.query("INSERT INTO Productos (nombre, precio, icono, categoria) VALUES ($1, $2, $3, $4)", [nombre, precio, icono, categoria]);
@@ -86,6 +80,7 @@ app.post('/agregar-producto', async (req, res) => {
 });
 
 app.delete('/borrar-producto/:id', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     try {
         await db.query("DELETE FROM Productos WHERE id=$1", [req.params.id]);
         res.json({ success: true });
@@ -93,17 +88,18 @@ app.delete('/borrar-producto/:id', async (req, res) => {
 });
 
 app.post('/nueva-venta', async (req, res) => {
-    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("Unauthorized");
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const { total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago } = req.body;
     const fecha = new Date().toLocaleString();
     try {
         const q = `INSERT INTO Ventas (fecha, total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-        const result = await db.query(q, [fecha, total, propina || 0, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago]);
-        res.json({ success: true, idVenta: usesCloud ? "Cloud" : result.lastID });
-    } catch (err) { console.error(err); res.status(500).send(err.message); }
+        await db.query(q, [fecha, total, propina || 0, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).send(err.message); }
 });
 
 app.get('/lista-ventas', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     try {
         const result = await db.query("SELECT * FROM Ventas ORDER BY id DESC LIMIT 50");
         res.json(result.rows);
@@ -118,12 +114,46 @@ app.get('/usuarios', async (req, res) => {
 });
 
 app.get('/reporte-cierre', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const hoy = `%${new Date().toLocaleDateString()}%`;
     try {
         const q = `SELECT metodo_pago, SUM(total) as totalvendido, SUM(propina) as totalpropina FROM Ventas WHERE fecha LIKE $1 GROUP BY metodo_pago`;
         const result = await db.query(q, [hoy]);
         res.json(result.rows);
     } catch (err) { res.status(500).send(err.message); }
+});
+
+app.get('/tasa-cambio', async (req, res) => {
+    try {
+        const result = await db.query("SELECT valor FROM Configuracion WHERE llave = 'tasa_cambio'");
+        res.json({ tasa: result.rows[0]?.valor || 36.62 });
+    } catch (e) { res.json({ tasa: 36.62 }); }
+});
+
+app.post('/tasa-cambio', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    const { tasa } = req.body;
+    try {
+        await db.query("INSERT INTO Configuracion (llave, valor) VALUES ('tasa_cambio', $1) ON CONFLICT (llave) DO UPDATE SET valor = EXCLUDED.valor", [tasa]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+app.post('/usuarios-admin', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    const { nombre, pin } = req.body;
+    try {
+        await db.query("INSERT INTO Usuarios (nombre, pin) VALUES ($1, $2)", [nombre, pin]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+app.delete('/usuarios-admin/:id', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    try {
+        await db.query("DELETE FROM Usuarios WHERE id = $1", [req.params.id]);
+        res.json({ success: true });
+    } catch (e) { res.status(500).send(e.message); }
 });
 
 app.get('/exportar-excel', async (req, res) => {
@@ -156,38 +186,6 @@ app.delete('/limpiar-mesa/:mesa', async (req, res) => {
         await db.query("DELETE FROM Mesas_Abiertas WHERE mesa = $1", [req.params.mesa]);
         res.json({ success: true });
     } catch (err) { res.status(500).send(err.message); }
-});
-
-// --- RUTA: OBTENER/GUARDAR TASA DE CAMBIO ---
-app.get('/tasa-cambio', async (req, res) => {
-    try {
-        const result = await db.query("SELECT valor FROM Configuracion WHERE llave = 'tasa_cambio'");
-        res.json({ tasa: result.rows[0]?.valor || 36.62 }); // 36.62 es el estándar actual aprox.
-    } catch (e) { res.json({ tasa: 36.62 }); }
-});
-
-app.post('/tasa-cambio', async (req, res) => {
-    const { tasa } = req.body;
-    try {
-        await db.query("INSERT INTO Configuracion (llave, valor) VALUES ('tasa_cambio', $1) ON CONFLICT (llave) DO UPDATE SET valor = EXCLUDED.valor", [tasa]);
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
-});
-
-// --- RUTA: GESTIÓN DE MESEROS (CRUD) ---
-app.post('/usuarios-admin', async (req, res) => {
-    const { nombre, pin } = req.body;
-    try {
-        await db.query("INSERT INTO Usuarios (nombre, pin) VALUES ($1, $2)", [nombre, pin]);
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
-});
-
-app.delete('/usuarios-admin/:id', async (req, res) => {
-    try {
-        await db.query("DELETE FROM Usuarios WHERE id = $1", [req.params.id]);
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
 });
 
 app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
