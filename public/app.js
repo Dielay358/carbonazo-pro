@@ -437,20 +437,66 @@ function cerrarModalEditor() { cerrarModal(); }
 // REPORTES
 async function abrirCierreCaja() {
     reproducirSonido('click');
-    document.getElementById('modal-cierre').style.display = 'block';
-    const res = await fetch(`${URL_SERVIDOR}/reporte-cierre`, { 
-        headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } 
-    });
-    const datos = await res.json();
-    let tV = 0, tP = 0;
-    let html = datos.map(f => {
-        tV += parseFloat(f.totalvendido); tP += parseFloat(f.totalpropina);
-        return `<div class="ticket-fila"><span>${f.metodo_pago}</span><span>C$ ${parseFloat(f.totalvendido).toFixed(2)}</span></div>`;
-    }).join('');
-    document.getElementById('cuerpo-cierre').innerHTML = `
-        <h2 style="text-align:center;">Ventas: C$ ${tV.toFixed(2)}</h2>
-        <h4 style="text-align:center; color:var(--exito);">Propinas: C$ ${tP.toFixed(2)}</h4>
-        <div style="padding:10px;">${html}</div>`;
+    
+    const modal = document.getElementById('modal-cierre');
+    const contenedor = document.getElementById('cuerpo-cierre');
+
+    // Verificación de seguridad para evitar el error de "null"
+    if (!modal || !contenedor) {
+        console.error("❌ Error: El modal de cierre no existe en el HTML.");
+        alert("Error técnico: No se encontró el componente de cierre.");
+        return;
+    }
+
+    contenedor.innerHTML = "<p style='text-align:center;'>Generando reporte...</p>";
+    modal.style.display = 'block';
+
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/reporte-cierre`, { 
+            headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } 
+        });
+        
+        if (!res.ok) throw new Error("Error en servidor");
+        
+        const datos = await res.json();
+        
+        let tVentas = 0;
+        let tPropinas = 0;
+
+        let html = datos.map(f => {
+            const venta = parseFloat(f.totalvendido) || 0;
+            const propina = parseFloat(f.totalpropina) || 0;
+            tVentas += venta;
+            tPropinas += propina;
+            
+            return `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
+                    <span><i class="fas fa-wallet"></i> ${f.metodo_pago}</span>
+                    <div style="text-align:right;">
+                        <div style="font-weight:bold;">C$ ${venta.toFixed(2)}</div>
+                        <div style="font-size:0.7rem; color:var(--exito);">Propina: C$ ${propina.toFixed(2)}</div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        contenedor.innerHTML = `
+            <div style="text-align:center; margin-bottom:20px;">
+                <h1 style="color:var(--oscuro); margin:0;">C$ ${tVentas.toFixed(2)}</h1>
+                <small style="color:#666;">VENTAS TOTALES DEL DÍA</small>
+                <div style="color:var(--exito); font-weight:bold; margin-top:5px;">
+                    Total Propinas: C$ ${tPropinas.toFixed(2)}
+                </div>
+            </div>
+            <div style="background:#f8f9fa; padding:15px; border-radius:10px;">
+                <h4 style="margin-top:0; border-bottom:2px solid #ddd; padding-bottom:5px;">Desglose:</h4>
+                ${html || '<p style="text-align:center;">No hay ventas hoy</p>'}
+            </div>
+        `;
+
+    } catch (error) {
+        console.error(error);
+        contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error al conectar con la base de datos.</p>";
+    }
 }
 
 // ADMIN PRODUCTOS
