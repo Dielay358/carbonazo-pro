@@ -309,3 +309,92 @@ header {
     .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; }
     .ticket-total { font-size: 1.2rem; font-weight: bold; text-align: right; }
 }
+
+/* --- DISEÑO DE HISTORIAL PRO --- */
+
+#tabla-ventas {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Espacio entre filas */
+    margin-top: 10px;
+}
+
+#tabla-ventas th {
+    background: transparent;
+    color: var(--oscuro);
+    padding: 12px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #ddd;
+}
+
+#tabla-ventas td {
+    background: white;
+    padding: 15px 12px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+/* Redondear las esquinas de cada fila */
+#tabla-ventas td:first-child { border-left: 1px solid #eee; border-radius: 10px 0 0 10px; }
+#tabla-ventas td:last-child { border-right: 1px solid #eee; border-radius: 0 10px 10px 0; }
+
+#tabla-ventas tr:hover td {
+    background-color: #f8f9fa;
+    border-color: var(--primario);
+}
+
+.badge-id {
+    background: var(--oscuro);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.monto-historial {
+    color: var(--exito);
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.btn-borrar-v {
+    background: #fff0f0;
+    color: var(--primario);
+    border: 1px solid #ffcccc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-borrar-v:hover {
+    background: var(--primario);
+    color: white;
+}
+
+.tarjeta-producto.agotado {
+    opacity: 0.5;
+    filter: grayscale(1);
+    cursor: not-allowed !important;
+}
+
+.tarjeta-producto.agotado::after {
+    content: "AGOTADO";
+    color: red;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.low-stock {
+    color: #e63946;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink { 
+    0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } 
+}
