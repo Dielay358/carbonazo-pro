@@ -37,7 +37,7 @@ header {
     z-index: 100;
 }
 
-.logo { font-size: 1.4rem; font-weight: bold; }
+.logo { font-size: 1.4rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
 .logo span { color: var(--primario); }
 
 /* 2. SELECTOR DE USUARIO */
@@ -60,7 +60,7 @@ header {
     cursor: pointer;
 }
 
-/* 3. MAPA DE MESAS */
+/* 3. MAPA DE MESAS Y TOTALES RÁPIDOS */
 .mapa-mesas {
     display: flex;
     flex-wrap: wrap;
@@ -86,11 +86,38 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .mesa-btn.ocupada { background-color: var(--primario); color: white; }
 .mesa-btn.seleccionada { border: 3px solid var(--oscuro); transform: scale(1.05); }
-.mesa-btn:active { transform: scale(0.95); }
+
+/* Popup de totales rápidos */
+.mesa-info-flotante {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--oscuro);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+.mesa-info-flotante span { color: #ffd166; font-weight: bold; }
+
+.mesa-btn:hover .mesa-info-flotante {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+}
 
 /* 4. LAYOUT PRINCIPAL */
 .contenedor-principal {
@@ -103,37 +130,21 @@ header {
 }
 
 /* 5. MENÚ Y CATEGORÍAS */
-.seccion-menu {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
+.seccion-menu { display: flex; flex-direction: column; overflow-y: auto; }
 
 .buscador {
     display: flex;
     align-items: center;
     background: white;
-    padding: 8px 15px;
+    padding: 10px 15px;
     border-radius: 10px;
     margin-bottom: 10px;
     box-shadow: var(--sombra);
 }
 
-.buscador input {
-    border: none;
-    outline: none;
-    width: 100%;
-    margin-left: 10px;
-    font-size: 1rem;
-}
+.buscador input { border: none; outline: none; width: 100%; margin-left: 10px; font-size: 1rem; }
 
-.filtros-categoria {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    overflow-x: auto;
-    padding: 5px 0;
-}
+.filtros-categoria { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding: 5px 0; }
 
 .btn-filtro {
     padding: 8px 18px;
@@ -145,8 +156,6 @@ header {
     box-shadow: var(--sombra);
     font-weight: 600;
 }
-
-.btn-filtro:hover { background: var(--oscuro); color: white; }
 
 .grid-productos {
     display: grid;
@@ -177,14 +186,7 @@ header {
     overflow: hidden;
 }
 
-.cabecera-carrito {
-    padding: 15px;
-    background: var(--oscuro);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.cabecera-carrito { padding: 15px; background: var(--oscuro); color: white; }
 
 .lista-items { flex: 1; overflow-y: auto; padding: 15px; }
 
@@ -193,214 +195,117 @@ header {
     justify-content: space-between;
     padding: 10px 0;
     border-bottom: 1px solid var(--gris-claro);
-    animation: aparecer 0.2s ease;
 }
-
-@keyframes aparecer { from { opacity: 0; transform: translateX(10px); } }
 
 /* 7. BOTONES ACCIÓN CARRITO */
 .totales { padding: 15px; background: var(--gris-claro); }
 
-.botones-accion-carrito {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+.fila-total { display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+
+.botones-accion-carrito { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+.btn-exito, .btn-secundario, .btn-anular {
+    padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white;
 }
 
-.btn-exito, .btn-secundario {
-    padding: 15px;
+.btn-exito { background: var(--exito); }
+.btn-secundario { background: var(--oscuro); }
+.btn-anular { background: #f4a261; } /* Naranja suave */
+
+/* 8. MODAL DE PAGO (MEJORADO) */
+.btn-pago {
+    padding: 18px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
+    font-size: 1.1rem;
     font-weight: bold;
+    color: white;
     cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-.btn-exito { background: var(--exito); color: white; }
-.btn-secundario { background: var(--oscuro); color: white; }
+.btn-pago:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.btn-pago:active { transform: translateY(0); }
 
-/* 8. MODALES */
+/* 9. MODALES GENERALES */
 .modal {
     display: none; position: fixed; z-index: 1000;
     left: 0; top: 0; width: 100%; height: 100%;
     background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(4px);
 }
 
 .contenido-modal {
     background-color: white; margin: 3% auto;
-    width: 90%; max-width: 650px; border-radius: 15px;
+    width: 90%; max-width: 500px; border-radius: 20px;
     overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.header-modal {
-    background: var(--oscuro); color: white; padding: 15px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-}
+.header-modal { background: var(--oscuro); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
 
 .btn-cerrar { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 
-/* 9. BOTONES FLOTANTES */
-.botones-flotantes {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    gap: 12px;
-}
-
-.btn-flotante {
-    width: 55px; height: 55px; border-radius: 50%;
-    border: none; color: white; cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    font-size: 1.2rem; transition: 0.3s;
-}
-
-.btn-flotante.dark { background: var(--oscuro); }
-.btn-flotante.gray { background: #6c757d; }
-.btn-flotante.green { background: var(--exito); }
-.btn-flotante:hover { transform: scale(1.1); }
-
-/* 10. CONFIGURACIÓN DE IMPRESIÓN 80mm */
-#area-impresion { display: none; }
-
-@page { size: 80mm auto; margin: 0; }
-
-@media print {
-    body * { visibility: hidden; }
-    #area-impresion, #area-impresion * { visibility: visible; }
-    #area-impresion {
-        display: block !important;
-        position: absolute; left: 0; top: 0;
-        width: 80mm; padding: 4mm;
-        font-family: 'Courier New', Courier, monospace;
-        background: white; color: black;
-    }
-    .ticket-header { text-align: center; margin-bottom: 5px; }
-    .ticket-divisor { border-top: 1px dashed black; margin: 5px 0; }
-    .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; }
-    .ticket-total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 10px; }
-}
-
-/* 11. UTILIDADES FORMULARIOS */
-.form-edit, .form-agregar-producto { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-.inputs-inline { display: flex; gap: 5px; flex-wrap: wrap; }
-.inputs-inline input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 80px; }
-
-/* Pantalla de Bloqueo */
-.login-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--oscuro); z-index: 2000;
-    display: flex; justify-content: center; align-items: center;
-}
-.login-box {
-    background: white; padding: 30px; border-radius: 20px;
-    text-align: center; width: 90%; max-width: 350px;
-}
-.login-box input, .login-box select {
-    width: 100%; padding: 15px; margin: 10px 0;
-    border: 1px solid #ddd; border-radius: 10px; font-size: 1.2rem; text-align: center;
-}
-
-/* Estilo para Comanda (Ticket de Cocina) */
-.ticket-comanda {
-    font-family: 'Courier New', Courier, monospace;
-    text-transform: uppercase;
-}
-.ticket-comanda h2 { font-size: 1.5rem; text-align: center; border: 2px solid black; }
-
+/* 10. CUENTA CARDS (SUB-MESAS) */
 .btn-cuenta-card {
     background: var(--gris-claro);
     border: 2px solid #ddd;
     padding: 15px;
     border-radius: 10px;
-    text-align: left;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 8px;
 }
 .btn-cuenta-card:hover { border-color: var(--primario); background: white; }
-.btn-cuenta-card strong { color: var(--oscuro); font-size: 1.1rem; }
-.btn-cuenta-card span { color: var(--exito); font-weight: bold; }
 
-/* Botón de Anular */
-.btn-anular {
-    background-color: #ffb703; /* Naranja advertencia */
-    color: var(--oscuro);
-    padding: 15px; border: none; border-radius: 10px;
-    font-weight: bold; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+/* 11. BOTONES FLOTANTES */
+.botones-flotantes { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 12px; }
+
+.btn-flotante {
+    width: 55px; height: 55px; border-radius: 50%; border: none; color: white; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1.2rem; transition: 0.3s;
 }
 
-/* --- VISTA DE TOTALES RÁPIDOS --- */
+.btn-flotante.gray { background: #6c757d; }
+.btn-flotante.green { background: var(--exito); }
 
-.mesa-btn {
-    position: relative; /* Necesario para posicionar el popup */
+/* 12. PANTALLA DE LOGIN */
+.login-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--oscuro); z-index: 2000;
+    display: flex; justify-content: center; align-items: center;
 }
 
-/* El cuadro flotante (oculto por defecto) */
-.mesa-info-flotante {
-    visibility: hidden;
-    opacity: 0;
-    position: absolute;
-    bottom: 115%; /* Aparece arriba del botón */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--oscuro);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    z-index: 100;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: opacity 0.3s, transform 0.3s;
-    pointer-events: none; /* No estorba al hacer clic */
+.login-box {
+    background: white; padding: 40px; border-radius: 25px;
+    text-align: center; width: 90%; max-width: 380px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
 }
 
-/* Triángulo decorativo abajo del popup */
-.mesa-info-flotante::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: var(--oscuro) transparent transparent transparent;
+.login-box input {
+    width: 100%; padding: 15px; margin: 15px 0;
+    border: 2px solid #eee; border-radius: 12px; font-size: 1.5rem; text-align: center;
 }
 
-/* Mostrar al pasar el mouse (PC) o dejar presionado (Móvil) */
-.mesa-btn:hover .mesa-info-flotante,
-.mesa-btn:active .mesa-info-flotante {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(-50%) translateY(-5px);
+/* 13. IMPRESIÓN 80mm */
+#area-impresion { display: none; }
+@page { size: 80mm auto; margin: 0; }
+@media print {
+    header, .mapa-mesas, main, .botones-flotantes, .modal { display: none !important; }
+    #area-impresion {
+        display: block !important; width: 80mm; padding: 4mm;
+        font-family: 'Courier New', Courier, monospace; background: white; color: black;
+    }
+    .ticket-header { text-align: center; }
+    .ticket-divisor { border-top: 1px dashed black; margin: 5px 0; }
+    .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .ticket-total { font-size: 1.2rem; font-weight: bold; text-align: right; }
 }
-
-/* Color especial para el total en el popup */
-.mesa-info-flotante span {
-    color: #ffd166; /* Dorado para el dinero */
-    font-weight: bold;
-    font-size: 0.85rem;
-}
-
-.btn-pago {
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-.btn-pago:active { transform: scale(0.95); }
