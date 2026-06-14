@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor de Cocina - El Carbonazo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #343a40; color: white; overflow-y: auto; }
+        .grid-cocina { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+        .pedido-card { background: white; color: black; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .pedido-header { border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .item-row { font-size: 1.4rem; padding: 5px 0; border-bottom: 1px solid #f9f9f9; }
+        .btn-listo { background: var(--exito); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header style="background:#212529;">
+        <h2><i class="fas fa-fire"></i> MONITOR DE PARRILLA</h2>
+        <div id="reloj"></div>
+    </header>
+    <div id="grid-cocina" class="grid-cocina">
+        <!-- Los pedidos aparecen aquí -->
+    </div>
+
+    <script>
+        async function cargarPedidos() {
+            const res = await fetch(window.location.origin + '/cocina-pendientes');
+            const pedidos = await res.json();
+            const grid = document.getElementById('grid-cocina');
+            grid.innerHTML = pedidos.map(p => {
+                const items = JSON.parse(p.items);
+                return `
+                    <div class="pedido-card">
+                        <div class="pedido-header">
+                            <h3>${p.mesa}</h3>
+                            <small>${p.fecha_apertura.split(', ')[1]}</small>
+                        </div>
+                        <div style="padding:10px 0;">
+                            ${items.map(i => `<div class="item-row"><strong>${i.cantidad}</strong> x ${i.nombre}</div>`).join('')}
+                        </div>
+                        <p>Mesero: ${p.mesero}</p>
+                        <button class="btn-listo" onclick="marcarListo('${p.mesa}')">PEDIDO LISTO</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function marcarListo(mesa) {
+            // Aquí podrías implementar una notificación al mesero
+            alert("Pedido de " + mesa + " marcado como listo");
+        }
+
+        setInterval(cargarPedidos, 5000);
+        cargarPedidos();
+        setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString(); }, 1000);
+    </script>
+</body>
+</html>
