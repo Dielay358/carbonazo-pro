@@ -1,3 +1,8 @@
+/**
+ * PROYECTO: ASADO EL CARBONAZO PRO
+ * DNA: Lógica Frontend Completa (Corregida)
+ */
+
 const URL_SERVIDOR = window.location.origin;
 const TOKEN_ACCESO = "carbonazo2024pro";
 
@@ -14,6 +19,7 @@ const listaCarrito = document.getElementById('items-carrito');
 const totalMontoLabel = document.getElementById('total-monto');
 const labelMesaActiva = document.getElementById('label-mesa-activa');
 
+// --- 1. INICIALIZACIÓN ---
 window.onload = async () => {
     await cargarUsuariosLogin();
     await obtenerProductosDB();
@@ -22,11 +28,13 @@ window.onload = async () => {
 };
 
 async function cargarUsuariosLogin() {
-    const res = await fetch(`${URL_SERVIDOR}/usuarios`);
-    const usuarios = await res.json();
-    const ops = usuarios.map(u => `<option value="${u.nombre}">${u.nombre}</option>`).join('');
-    document.getElementById('login-usuario').innerHTML = ops;
-    document.getElementById('select-mesero').innerHTML = ops;
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/usuarios`);
+        const usuarios = await res.json();
+        const ops = usuarios.map(u => `<option value="${u.nombre}">${u.nombre}</option>`).join('');
+        document.getElementById('login-usuario').innerHTML = ops;
+        document.getElementById('select-mesero').innerHTML = ops;
+    } catch(e) { console.error("Error cargando usuarios"); }
 }
 
 async function intentarLogin() {
@@ -42,14 +50,17 @@ async function intentarLogin() {
         document.getElementById('select-mesero').value = nombre;
         document.getElementById('pantalla-login').style.display = 'none';
         reproducirSonido('exito');
-    } else alert("PIN Incorrecto");
+    } else alert("PIN Incorrecto ❌");
 }
 
+// --- 2. PRODUCTOS Y MENÚ ---
 async function obtenerProductosDB() {
-    const res = await fetch(`${URL_SERVIDOR}/productos`);
-    productos = await res.json();
-    cargarMenu(productos);
-    generarFiltrosCategorias();
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/productos`);
+        productos = await res.json();
+        cargarMenu(productos);
+        generarFiltrosCategorias();
+    } catch(e) { console.error("Error productos"); }
 }
 
 function generarFiltrosCategorias() {
@@ -58,7 +69,13 @@ function generarFiltrosCategorias() {
 }
 
 function filtrarPorCategoria(cat) {
+    reproducirSonido('click');
     cargarMenu(cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat));
+}
+
+function filtrarBusqueda() {
+    const bus = document.getElementById('buscar-producto').value.toLowerCase();
+    cargarMenu(productos.filter(p => p.nombre.toLowerCase().includes(bus)));
 }
 
 function cargarMenu(lista) {
@@ -67,11 +84,11 @@ function cargarMenu(lista) {
             <div style="font-size: 2.5rem;">${p.icono}</div>
             <h3>${p.nombre}</h3>
             <p style="color:var(--primario); font-weight:bold;">C$ ${p.precio.toFixed(2)}</p>
-            <small>${p.categoria || 'General'}</small>
         </div>
     `).join('');
 }
 
+// --- 3. MANEJO DE MESAS Y SUB-CUENTAS ---
 function dibujarMapaMesas() {
     const contenedor = document.getElementById('contenedor-mesas');
     contenedor.innerHTML = '';
@@ -96,10 +113,13 @@ function dibujarMapaMesas() {
 }
 
 async function abrirSelectorDeCuenta(idBase) {
+    reproducirSonido('click');
     const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idBase));
-    if (cuentas.length === 0) seleccionarCuentaDirecta(idBase);
-    else {
-        mesaSeleccionada = idBase;
+    mesaSeleccionada = idBase; // Guardamos la mesa base globalmente
+
+    if (cuentas.length === 0) {
+        seleccionarCuentaDirecta(idBase);
+    } else {
         document.getElementById('titulo-selector-mesa').innerText = idBase;
         document.getElementById('lista-cuentas-mesa').innerHTML = cuentas.map(c => `
             <div class="btn-cuenta-card" onclick="seleccionarCuentaDirecta('${c.mesa}')">
@@ -111,6 +131,15 @@ async function abrirSelectorDeCuenta(idBase) {
     }
 }
 
+// --- ESTA ERA LA FUNCIÓN QUE FALTABA ---
+function prepararNuevaSubCuenta() {
+    const nombre = prompt("Nombre para la cuenta nueva (Ej: Diego):");
+    if (nombre) {
+        cerrarSelectorCuentas();
+        seleccionarCuentaDirecta(`${mesaSeleccionada} - ${nombre}`);
+    }
+}
+
 function seleccionarCuentaDirecta(nombre) {
     subCuentaActiva = nombre;
     mesaSeleccionada = nombre.split(' - ')[0];
@@ -119,11 +148,13 @@ function seleccionarCuentaDirecta(nombre) {
     const pedido = mesasAbiertas.find(m => m.mesa === nombre);
     carrito = pedido ? JSON.parse(pedido.items) : [];
     actualizarInterfazCarrito();
-    document.getElementById('modal-selector-cuentas').style.display = 'none';
+    cerrarSelectorCuentas();
     dibujarMapaMesas();
 }
 
+// --- 4. CARRITO ---
 function agregarProducto(id) {
+    reproducirSonido('click');
     const p = productos.find(x => x.id === id);
     const ex = carrito.find(i => i.id === id);
     if (ex) ex.cantidad++; else carrito.push({ ...p, cantidad: 1 });
@@ -139,7 +170,7 @@ function eliminarUno(id) {
 function actualizarInterfazCarrito() {
     let total = 0;
     if (carrito.length === 0) {
-        listaCarrito.innerHTML = '<p class="carrito-vacio">Vacío</p>';
+        listaCarrito.innerHTML = '<p class="carrito-vacio">El carrito está vacío</p>';
         totalMontoLabel.innerText = "C$ 0.00";
         return;
     }
@@ -157,21 +188,34 @@ function actualizarInterfazCarrito() {
     totalMontoLabel.innerText = `C$ ${total.toFixed(2)}`;
 }
 
+// --- 5. ACCIONES DE GUARDADO Y PAGO ---
 async function guardarPedidoTemporal() {
-    if (!subCuentaActiva) return alert("Seleccione mesa");
+    if (!subCuentaActiva) return alert("❌ Seleccione una mesa primero.");
     const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
-    await fetch(`${URL_SERVIDOR}/guardar-mesa`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
-        body: JSON.stringify({ mesa: subCuentaActiva, items: carrito, mesero: usuarioLogueado, total_actual: total })
-    });
-    if (confirm("¿Imprimir comanda?")) imprimirComanda(subCuentaActiva, carrito);
-    limpiarPantallaPostAccion();
-    await refrescarMesas();
+    try {
+        await fetch(`${URL_SERVIDOR}/guardar-mesa`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
+            body: JSON.stringify({ mesa: subCuentaActiva, items: carrito, mesero: usuarioLogueado, total_actual: total })
+        });
+        reproducirSonido('exito');
+        if (confirm("¿Imprimir comanda para cocina?")) imprimirComanda(subCuentaActiva, carrito);
+        limpiarPantallaPostAccion();
+        await refrescarMesas();
+    } catch(e) { alert("Error al guardar"); }
+}
+
+async function anularCuentaActual() {
+    if (!subCuentaActiva) return;
+    if (confirm(`⚠️ ¿Eliminar cuenta "${subCuentaActiva}"?`)) {
+        await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
+        limpiarPantallaPostAccion();
+        await refrescarMesas();
+    }
 }
 
 function finalizarVenta() {
-    if (carrito.length === 0) return;
+    if (carrito.length === 0) return alert("El carrito está vacío.");
     totalVentaSinPropina = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
     document.getElementById('pago-subtotal').innerText = `C$ ${totalVentaSinPropina.toFixed(2)}`;
     document.getElementById('input-propina').value = (totalVentaSinPropina * 0.1).toFixed(2);
@@ -189,7 +233,7 @@ async function confirmarVentaFinal(metodo) {
     const datos = { 
         total: totalVentaSinPropina + propina, propina, mesero: usuarioLogueado, 
         tipo_pedido: document.getElementById('tipo-pedido').value,
-        mesa: subCuentaActiva || "Barra", cliente: subCuentaActiva || "Gral", metodo_pago: metodo 
+        mesa: subCuentaActiva, cliente: subCuentaActiva, metodo_pago: metodo 
     };
     const res = await fetch(`${URL_SERVIDOR}/nueva-venta`, {
         method: 'POST',
@@ -197,18 +241,22 @@ async function confirmarVentaFinal(metodo) {
         body: JSON.stringify(datos)
     });
     if (res.ok) {
-        if (subCuentaActiva) await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
+        reproducirSonido('exito');
+        await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
         generarTicketPro(datos);
         limpiarPantallaPostAccion();
-        document.getElementById('modal-metodo-pago').style.display = 'none';
+        cerrarModalPago();
         await refrescarMesas();
     }
 }
 
+// --- 6. UTILIDADES ---
 async function refrescarMesas() {
-    const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
-    mesasAbiertas = await res.json();
-    dibujarMapaMesas();
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
+        mesasAbiertas = await res.json();
+        dibujarMapaMesas();
+    } catch(e) { console.error("Error sincronización"); }
 }
 
 function limpiarPantallaPostAccion() {
@@ -221,7 +269,8 @@ function limpiarPantallaPostAccion() {
 function generarTicketPro(d) {
     const area = document.getElementById('area-impresion');
     const items = carrito.map(i => `<div class="ticket-fila"><span>${i.cantidad} x ${i.nombre}</span><span>${(i.precio * i.cantidad).toFixed(2)}</span></div>`).join('');
-    area.innerHTML = `<div class="ticket-header"><h3>EL CARBONAZO</h3><p>${new Date().toLocaleString()}</p></div>
+    area.innerHTML = `
+        <div class="ticket-header"><h3>EL CARBONAZO</h3><p>${new Date().toLocaleString()}</p></div>
         <div class="ticket-divisor"></div><p>Mesa: ${d.mesa}</p><div class="ticket-divisor"></div>
         ${items}<div class="ticket-divisor"></div>
         <div class="ticket-fila"><span>Subtotal:</span><span>${(d.total - d.propina).toFixed(2)}</span></div>
@@ -241,9 +290,12 @@ function imprimirComanda(m, items) {
 function reproducirSonido(t) { const s = document.getElementById(`sonido-${t}`); if (s) { s.currentTime=0; s.play().catch(()=>{}); } }
 function cerrarModalPago() { document.getElementById('modal-metodo-pago').style.display='none'; }
 function cerrarSelectorCuentas() { document.getElementById('modal-selector-cuentas').style.display='none'; }
+function cerrarModalAdmin() { document.getElementById('modal-admin-productos').style.display='none'; }
+function cerrarModalCierre() { document.getElementById('modal-cierre').style.display='none'; }
 
-// REPORTE DE CIERRE
+// --- 7. REPORTES Y ADMIN ---
 async function abrirCierreCaja() {
+    reproducirSonido('click');
     document.getElementById('modal-cierre').style.display = 'block';
     const res = await fetch(`${URL_SERVIDOR}/reporte-cierre`, { headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } });
     const datos = await res.json();
@@ -258,18 +310,36 @@ async function abrirCierreCaja() {
         <div style="padding:10px;">${html}</div>`;
 }
 
-// ADMIN PRODUCTOS (Simplificado)
 function abrirAdminProductos() { document.getElementById('modal-admin-productos').style.display='block'; renderizarAdminProductos(); }
+
 function renderizarAdminProductos() {
     document.getElementById('cuerpo-tabla-admin').innerHTML = productos.map(p => `
         <tr><td>${p.icono}</td><td>${p.nombre}</td><td>${p.precio}</td>
         <td><button onclick="borrarProducto(${p.id})" style="color:red;"><i class="fas fa-trash"></i></button></td></tr>`).join('');
 }
+
 async function guardarNuevoProducto() {
-    const datos = { nombre: document.getElementById('nuevo-nombre').value, precio: parseFloat(document.getElementById('nuevo-precio').value), icono: document.getElementById('nuevo-icono').value, categoria: document.getElementById('nuevo-categoria').value };
-    await fetch(`${URL_SERVIDOR}/agregar-producto`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) });
-    await obtenerProductosDB(); renderizarAdminProductos();
+    const datos = { 
+        nombre: document.getElementById('nuevo-nombre').value, 
+        precio: parseFloat(document.getElementById('nuevo-precio').value), 
+        icono: document.getElementById('nuevo-icono').value, 
+        categoria: document.getElementById('nuevo-categoria').value 
+    };
+    await fetch(`${URL_SERVIDOR}/agregar-producto`, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` }, 
+        body: JSON.stringify(datos) 
+    });
+    await obtenerProductosDB(); 
+    renderizarAdminProductos();
 }
-async function borrarProducto(id) { await fetch(`${URL_SERVIDOR}/borrar-producto/${id}`, { method: 'DELETE' }); await obtenerProductosDB(); renderizarAdminProductos(); }
-function cerrarModalAdmin() { document.getElementById('modal-admin-productos').style.display='none'; }
-function cerrarModalCierre() { document.getElementById('modal-cierre').style.display='none'; }
+
+async function borrarProducto(id) {
+    if(!confirm("¿Borrar?")) return;
+    await fetch(`${URL_SERVIDOR}/borrar-producto/${id}`, { 
+        method: 'DELETE', 
+        headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } 
+    });
+    await obtenerProductosDB(); 
+    renderizarAdminProductos();
+}
