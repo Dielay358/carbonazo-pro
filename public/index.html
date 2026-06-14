@@ -123,42 +123,69 @@
     </div>
 </div>
 
+<!-- Modal Gestión de Productos (ADMIN) -->
 <div id="modal-admin-productos" class="modal">
     <div class="contenido-modal">
-        <header class="header-modal"><h2>ADMIN MENU</h2><button onclick="cerrarModalAdmin()" class="btn-cerrar">&times;</button></header>
-        <div style="padding:15px;">
-            <input type="text" id="nuevo-nombre" placeholder="Nombre">
-            <input type="number" id="nuevo-precio" placeholder="Precio">
-            <input type="text" id="nuevo-icono" placeholder="Emoji">
-            <input type="text" id="nuevo-categoria" placeholder="Cat">
-            <button onclick="guardarNuevoProducto()" class="btn-exito">GUARDAR</button>
-        </div>
-        <table style="width:100%; padding:10px;"><tbody id="cuerpo-tabla-admin"></tbody></table>
-        <!-- Dentro del contenido-modal de Admin, añade esta navegación simple -->
-        <div style="display: flex; gap: 10px; padding: 10px; background: #eee;">
-             <button onclick="cambiarTabAdmin('prods')" class="btn-filtro">Productos</button>
-             <button onclick="cambiarTabAdmin('users')" class="btn-filtro">Meseros</button>
-             <button onclick="cambiarTabAdmin('config')" class="btn-filtro">Configuración</button>
+        <header class="header-modal">
+            <h2>ADMINISTRACIÓN</h2>
+            <button onclick="cerrarModalAdmin()" class="btn-cerrar">&times;</button>
+        </header>
+
+        <!-- Navegación de Pestañas -->
+        <div style="display: flex; gap: 5px; padding: 10px; background: #f0f0f0; justify-content: center;">
+            <button onclick="cambiarTabAdmin('prods')" class="btn-filtro">Productos</button>
+            <button onclick="cambiarTabAdmin('users')" class="btn-filtro">Meseros</button>
+            <button onclick="cambiarTabAdmin('config')" class="btn-filtro">Configuración</button>
         </div>
 
-    <!-- Sección Meseros (oculta por defecto) -->
-    <div id="tab-users" style="display:none; padding: 15px;">
-        <h4>Gestionar Personal</h4>
-        <div class="inputs-inline">
-           <input type="text" id="nuevo-user-nombre" placeholder="Nombre">
-           <input type="text" id="nuevo-user-pin" placeholder="PIN (4 dígitos)">
-           <button onclick="guardarNuevoUsuario()" class="btn-exito"><i class="fas fa-user-plus"></i></button>
-        </div>
-        <table style="width:100%; margin-top:10px;"><tbody id="tabla-admin-usuarios"></tbody></table>
-    </div>
+        <div class="tabla-contenedor" style="max-height: 450px; overflow-y: auto;">
+            
+            <!-- SECCIÓN 1: PRODUCTOS -->
+            <div id="tab-prods" class="admin-tab-content">
+                <div class="form-agregar-producto" style="background: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4>Nuevo Producto</h4>
+                    <div class="inputs-inline">
+                        <input type="text" id="nuevo-nombre" placeholder="Nombre">
+                        <input type="number" id="nuevo-precio" placeholder="Precio">
+                        <input type="text" id="nuevo-icono" placeholder="Emoji">
+                        <input type="text" id="nuevo-categoria" placeholder="Cat">
+                        <button onclick="guardarNuevoProducto()" class="btn-exito">GUARDAR</button>
+                    </div>
+                </div>
+                <table style="width: 100%;">
+                    <thead><tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead>
+                    <tbody id="cuerpo-tabla-admin"></tbody>
+                </table>
+            </div>
 
-    <!-- Sección Tasa de Cambio (oculta por defecto) -->
-    <div id="tab-config" style="display:none; padding: 15px;">
-        <h4>Ajustes del Sistema</h4>
-        <label>Tasa de Cambio (NIO x 1 USD):</label>
-        <input type="number" id="input-tasa-cambio" step="0.01" style="font-size: 1.5rem; text-align: center;">
-        <button onclick="guardarTasaCambio()" class="btn-exito" style="width:100%; margin-top:10px;">ACTUALIZAR TASA</button>
-    </div>
+            <!-- SECCIÓN 2: MESEROS -->
+            <div id="tab-users" class="admin-tab-content" style="display:none;">
+                <div style="background: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4>Nuevo Mesero</h4>
+                    <div class="inputs-inline">
+                        <input type="text" id="nuevo-user-nombre" placeholder="Nombre">
+                        <input type="text" id="nuevo-user-pin" placeholder="PIN (4 n°) ">
+                        <button onclick="guardarNuevoUsuario()" class="btn-exito">AGREGAR</button>
+                    </div>
+                </div>
+                <table style="width: 100%;">
+                    <thead><tr><th>Nombre</th><th style="text-align:right;">Acción</th></tr></thead>
+                    <tbody id="tabla-admin-usuarios"></tbody>
+                </table>
+            </div>
+
+            <!-- SECCIÓN 3: CONFIGURACIÓN (TASA DE CAMBIO) -->
+            <div id="tab-config" class="admin-tab-content" style="display:none; padding: 20px; text-align: center;">
+                <i class="fas fa-university" style="font-size: 3rem; color: var(--oscuro); margin-bottom: 15px;"></i>
+                <h4>Ajustes de Moneda</h4>
+                <p>Tasa de cambio actual (NIO x 1 USD)</p>
+                <input type="number" id="input-tasa-cambio" step="0.01" style="font-size: 2rem; width: 200px; text-align: center; border: 2px solid var(--oscuro); border-radius: 10px;">
+                <button onclick="guardarTasaCambio()" class="btn-exito" style="width: 100%; margin-top: 20px;">
+                    ACTUALIZAR TASA DE CAMBIO
+                </button>
+            </div>
+
+        </div>
     </div>
 </div>
 

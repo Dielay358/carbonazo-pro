@@ -287,13 +287,25 @@ async function borrarUsuario(id) {
     }
 }
 
-// Navegación de pestañas en Admin
 function cambiarTabAdmin(tab) {
-    document.getElementById('cuerpo-tabla-admin').parentElement.style.display = (tab === 'prods') ? 'table' : 'none';
-    document.querySelector('.form-agregar-producto').style.display = (tab === 'prods') ? 'block' : 'none';
-    document.getElementById('tab-users').style.display = (tab === 'users') ? 'block' : 'none';
-    document.getElementById('tab-config').style.display = (tab === 'config') ? 'block' : 'none';
-    if(tab === 'users') renderizarAdminUsuarios();
+    reproducirSonido('click');
+    
+    // 1. Ocultar todas las pestañas primero
+    document.querySelectorAll('.admin-tab-content').forEach(el => {
+        el.style.display = 'none';
+    });
+
+    // 2. Mostrar solo la que necesitamos
+    if (tab === 'prods') {
+        document.getElementById('tab-prods').style.display = 'block';
+        renderizarAdminProductos(); // Asegurar que la lista de productos esté cargada
+    } else if (tab === 'users') {
+        document.getElementById('tab-users').style.display = 'block';
+        renderizarAdminUsuarios(); // Cargar la lista de meseros
+    } else if (tab === 'config') {
+        document.getElementById('tab-config').style.display = 'block';
+        cargarTasaCambio(); // Traer la tasa desde el servidor
+    }
 }
 
 async function confirmarVentaFinal(metodo) {
