@@ -9,6 +9,7 @@
 </head>
 <body>
 
+<!-- 1. PANTALLA DE LOGIN -->
 <div id="pantalla-login" class="login-overlay">
     <div class="login-box">
         <i class="fas fa-fire" style="font-size: 3rem; color: var(--primario);"></i>
@@ -19,6 +20,7 @@
     </div>
 </div>
 
+<!-- 2. ENCABEZADO -->
 <header>
     <div class="logo">EL CARBONAZO <span>PRO</span></div>
     <div class="usuario-selector">
@@ -31,9 +33,11 @@
     </div>
 </header>
 
+<!-- 3. MAPA DE MESAS (Restaurado arriba del menú) -->
 <section id="contenedor-mesas" class="mapa-mesas"></section>
 
 <main class="contenedor-principal">
+    <!-- COLUMNA IZQUIERDA: MENÚ -->
     <section class="seccion-menu">
         <div class="buscador">
             <i class="fas fa-search"></i>
@@ -43,6 +47,7 @@
         <div class="grid-productos" id="contenedor-menu"></div>
     </section>
 
+    <!-- COLUMNA DERECHA: CARRITO -->
     <section class="seccion-carrito">
         <div class="cabecera-carrito">
             <h3>PEDIDO</h3>
@@ -59,29 +64,40 @@
         <div class="totales">
             <div class="fila-total"><span>Total:</span><span id="total-monto">C$ 0.00</span></div>
             <div class="botones-accion-carrito" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-                <button onclick="guardarPedidoTemporal()" class="btn-secundario"><i class="fas fa-save"></i></button>
-                <button onclick="anularCuentaActual()" class="btn-anular"><i class="fas fa-trash"></i></button>
-                <button onclick="finalizarVenta()" class="btn-exito"><i class="fas fa-check-circle"></i></button>
+                <!-- Botón Pendiente envía a Cocina -->
+                <button onclick="guardarPedidoTemporal()" class="btn-secundario" title="Guardar/Cocina"><i class="fas fa-utensils"></i></button>
+                <button onclick="anularCuentaActual()" class="btn-anular" title="Anular"><i class="fas fa-trash"></i></button>
+                <button onclick="finalizarVenta()" class="btn-exito" title="Cobrar"><i class="fas fa-check-circle"></i></button>
             </div>
         </div>
     </section>
 </main>
 
+<!-- 4. MODALES -->
+
+<!-- Selector de Cuentas -->
 <div id="modal-selector-cuentas" class="modal">
     <div class="contenido-modal">
-        <header class="header-modal"><h2 id="titulo-selector-mesa"></h2><button onclick="cerrarSelectorCuentas()" class="btn-cerrar">&times;</button></header>
+        <header class="header-modal"><h2 id="titulo-selector-mesa"></h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
         <div id="lista-cuentas-mesa" style="padding:20px; display:grid; gap:10px;"></div>
         <button onclick="prepararNuevaSubCuenta()" class="btn-secundario" style="margin:10px; width:90%;">+ NUEVA CUENTA</button>
     </div>
 </div>
 
+<!-- Finalizar Pago con CRM (Clientes) -->
 <div id="modal-metodo-pago" class="modal">
-    <div class="contenido-modal">
+    <div class="contenido-modal" style="max-width: 400px;">
         <header class="header-modal">
             <h2><i class="fas fa-file-invoice-dollar"></i> Finalizar Cuenta</h2>
-            <button onclick="cerrarModalPago()" class="btn-cerrar">&times;</button>
+            <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
         </header>
         <div style="padding: 20px; text-align: center;">
+            <!-- Registro de Cliente -->
+            <div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px; display:flex; gap:5px;">
+                <input type="text" id="cliente-nombre" placeholder="Nombre Cliente" style="flex:2; padding:8px; border-radius:5px; border:1px solid #ccc;">
+                <input type="text" id="cliente-tel" placeholder="Teléfono" style="flex:1; padding:8px; border-radius:5px; border:1px solid #ccc;">
+            </div>
+
             <p>Subtotal: <span id="pago-subtotal" style="font-weight:bold;"></span></p>
             <div style="background:#f1faee; padding:15px; border-radius:12px; margin:15px 0; border:1px solid #d8e2dc;">
                 <label style="font-weight:bold; color:var(--exito);">Propina (10%):</label>
@@ -98,16 +114,23 @@
     </div>
 </div>
 
+<!-- Historial Pro -->
 <div id="modal-ventas" class="modal">
     <div class="contenido-modal">
         <header class="header-modal"><h2>HISTORIAL</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
-        <div class="tabla-contenedor"><table><thead><tr><th>ID</th><th>Fecha</th><th>Mesa</th><th>Mesero</th><th>Total</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-ventas"></tbody></table></div>
+        <div class="tabla-contenedor">
+            <table id="tabla-ventas">
+                <thead><tr><th>ID</th><th>Fecha</th><th>Mesa</th><th>Mesero</th><th>Total</th><th>Acción</th></tr></thead>
+                <tbody id="cuerpo-tabla-ventas"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<!-- Administración con Stock -->
 <div id="modal-admin-productos" class="modal">
     <div class="contenido-modal">
-        <header class="header-modal"><h2>ADMINISTRACIÓN</h2><button onclick="cerrarModalAdmin()" class="btn-cerrar">&times;</button></header>
+        <header class="header-modal"><h2>ADMINISTRACIÓN</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
         <div style="display:flex; gap:5px; padding:10px; background:#f0f0f0; justify-content:center;">
             <button onclick="cambiarTabAdmin('prods')" class="btn-filtro">Productos</button>
             <button onclick="cambiarTabAdmin('users')" class="btn-filtro">Meseros</button>
@@ -121,11 +144,13 @@
                         <input type="number" id="nuevo-precio" placeholder="Precio">
                         <input type="text" id="nuevo-icono" placeholder="Emoji">
                         <input type="text" id="nuevo-categoria" placeholder="Cat">
+                        <input type="number" id="nuevo-stock" placeholder="Stock" style="width:70px;">
                         <button onclick="guardarNuevoProducto()" class="btn-exito">GUARDAR</button>
                     </div>
                 </div>
-                <table style="width:100%;"><thead><tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-admin"></tbody></table>
+                <table style="width:100%;"><thead><tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-admin"></tbody></table>
             </div>
+            <!-- Pestañas de Usuarios y Configuración se mantienen iguales -->
             <div id="tab-users" class="admin-tab-content" style="display:none;">
                 <div style="background:#e9ecef; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <div class="inputs-inline">
@@ -146,12 +171,30 @@
     </div>
 </div>
 
-<div class="botones-flotantes">
-    <button onclick="abrirModalVentas()" class="btn-flotante dark"><i class="fas fa-history"></i></button>
-    <button onclick="abrirAdminProductos()" class="btn-flotante gray"><i class="fas fa-cog"></i></button>
-    <button onclick="abrirCierreCaja()" class="btn-flotante green"><i class="fas fa-file-invoice-dollar"></i></button>
+<!-- Modal Cierre de Caja -->
+<div id="modal-cierre" class="modal">
+    <div class="contenido-modal" style="max-width: 450px;">
+        <header class="header-modal" style="background: var(--exito);">
+            <h2><i class="fas fa-cash-register"></i> Cierre de Caja Diario</h2>
+            <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
+        </header>
+        <div id="cuerpo-cierre" style="padding: 20px;"></div>
+        <div style="padding: 15px; border-top: 1px solid #eee; text-align: center;">
+            <button onclick="window.print()" class="btn-exito" style="width: 100%;">
+                <i class="fas fa-print"></i> IMPRIMIR REPORTE
+            </button>
+        </div>
+    </div>
 </div>
 
+<!-- 5. BOTONES FLOTANTES -->
+<div class="botones-flotantes">
+    <button onclick="abrirModalVentas()" class="btn-flotante dark" title="Historial"><i class="fas fa-history"></i></button>
+    <button onclick="abrirAdminProductos()" class="btn-flotante gray" title="Admin"><i class="fas fa-cog"></i></button>
+    <button onclick="abrirCierreCaja()" class="btn-flotante green" title="Cierre de Caja"><i class="fas fa-file-invoice-dollar"></i></button>
+</div>
+
+<!-- 6. ELEMENTOS OCULTOS -->
 <div id="area-impresion"></div>
 <audio id="sonido-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 <audio id="sonido-exito" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
