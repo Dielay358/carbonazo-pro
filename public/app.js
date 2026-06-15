@@ -297,3 +297,105 @@ function generarTicketPro(d) {
     area.innerHTML = `<div class="ticket-header"><h3>EL CARBONAZO</h3><p>${new Date().toLocaleString()}</p></div><div class="ticket-divisor"></div><p>Mesa: ${d.mesa}</p><div class="ticket-divisor"></div>${items}<div class="ticket-divisor"></div><div class="ticket-fila"><span>Subtotal:</span><span>${(d.total - d.propina).toFixed(2)}</span></div><div class="ticket-fila"><span>Propina:</span><span>${d.propina.toFixed(2)}</span></div><div class="ticket-total">TOTAL: C$ ${d.total.toFixed(2)}</div><p style="text-align:center;">Pago: ${d.metodo_pago}</p>`;
     setTimeout(() => window.print(), 300);
 }
+
+// --- PRE-CUENTA (Imprimir para el cliente sin cerrar mesa) ---
+function imprimirPreCuenta() {
+    if (carrito.length === 0) return alert("Carrito vacío");
+    const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    const propina = total * 0.10;
+    
+    const area = document.getElementById('area-impresion');
+    let itemsHtml = carrito.map(i => `<div class="ticket-fila"><span>${i.cantidad} x ${i.nombre}</span><span>C$ ${(i.precio * i.cantidad).toFixed(2)}</span></div>`).join('');
+    
+    area.innerHTML = `
+        <div class="ticket-header">
+            <h3>EL CARBONAZO</h3>
+            <p>*** PRE-CUENTA ***</p>
+            <p>(No es un comprobante de pago)</p>
+            <p>${new Date().toLocaleString()}</p>
+        </div>
+        <div class="ticket-divisor"></div>
+        <p>Mesa: ${subCuentaActiva || "Barra"}</p>
+        <div class="ticket-divisor"></div>
+        ${itemsHtml}
+        <div class="ticket-divisor"></div>
+        <div class="ticket-fila"><span>Subtotal:</span><span>C$ ${total.toFixed(2)}</span></div>
+        <div class="ticket-fila"><span>Propina (10%):</span><span>C$ ${propina.toFixed(2)}</span></div>
+        <div class="ticket-total">TOTAL A PAGAR: C$ ${(total + propina).toFixed(2)}</div>
+    `;
+    setTimeout(() => window.print(), 300);
+}
+
+// --- PAGOS COMBINADOS ---
+function activarPagoCombinado() {
+    document.getElementById('seccion-pago-simple').style.display = 'none';
+    document.getElementById('seccion-pago-combinado').style.display = 'block';
+    validarSumaCombinada();
+}
+
+function validarSumaCombinada() {
+    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
+    const totalObjetivo = totalVentaSinPropina + propina;
+    
+    const efec = parseFloat(document.getElementById('split-efectivo').value) || 0;
+    const tarj = parseFloat(document.getElementById('split-tarjeta').value) || 0;
+    const trans = parseFloat(document.getElementById('split-transf').value) || 0;
+    
+    const sumaActual = efec + tarj + trans;
+    const faltante = totalObjetivo - sumaActual;
+    
+    const aviso = document.getElementById('combinado-aviso');
+    const btn = document.getElementById('btn-confirmar-combinado');
+    
+    if (Math.abs(faltante) < 0.01) {
+        aviso.innerText = "✅ Total exacto";
+        aviso.style.color = "green";
+        btn.disabled = false;
+    } else {
+        aviso.innerText = faltante > 0 ? `Faltan: C$ ${faltante.toFixed(2)}` : `Sobra: C$ ${Math.abs(faltante).toFixed(2)}`;
+        aviso.style.color = "red";
+        btn.disabled = true;
+    }
+}
+
+// --- ACTUALIZAR CONFIRMAR VENTA FINAL ---
+async function confirmarVentaFinal(metodo) {
+    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
+    const totalFinal = totalVentaSinPropina + propina;
+    
+    // Valores para el desglose
+    let p_efectivo = 0, p_tarjeta = 0, p_transf = 0;
+    
+    if (metodo === 'Combinado') {
+        p_efectivo = parseFloat(document.getElementById('split-efectivo').value) || 0;
+        p_tarjeta = parseFloat(document.getElementById('split-tarjeta').value) || 0;
+        p_transf = parseFloat(document.getElementById('split-transf').value) || 0;
+    } else if (metodo === 'Efectivo') p_efectivo = totalFinal;
+    else if (metodo === 'Tarjeta') p_tarjeta = totalFinal;
+    else if (metodo === 'Transferencia') p_transf = totalFinal;
+
+    const datos = { 
+        total: totalFinal, propina, mesero: usuarioLogueado, 
+        tipo_pedido: document.getElementById('tipo-pedido').value,
+        mesa: subCuentaActiva, cliente: document.getElementById('cliente-nombre').value || "Gral", 
+        metodo_pago: metodo, items: carrito,
+        p_efectivo, p_tarjeta, p_transf
+    };
+
+    const res = await fetch(`${URL_SERVIDOR}/nueva-venta`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
+        body: JSON.stringify(datos)
+    });
+
+    if (res.ok) {
+        if (subCuentaActiva) await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
+        reproducirSonido('exito');
+        generarTicketPro(datos);
+        limpiarPantallaPostAccion();
+        cerrarModal();
+        document.getElementById('seccion-pago-simple').style.display = 'block';
+        document.getElementById('seccion-pago-combinado').style.display = 'none';
+        await obtenerProductosDB(); await refrescarMesas();
+    }
+}

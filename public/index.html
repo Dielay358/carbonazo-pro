@@ -63,10 +63,16 @@
         <div class="lista-items" id="items-carrito"></div>
         <div class="totales">
             <div class="fila-total"><span>Total:</span><span id="total-monto">C$ 0.00</span></div>
-            <div class="botones-accion-carrito">
-                <button onclick="guardarPedidoTemporal()" class="btn-secundario" title="Cocina"><i class="fas fa-utensils"></i></button>
-                <button onclick="anularCuentaActual()" class="btn-anular" title="Anular"><i class="fas fa-trash-alt"></i></button>
-                <button onclick="finalizarVenta()" class="btn-exito" title="Cobrar"><i class="fas fa-check-circle"></i></button>
+            <!-- En la sección del Carrito, actualiza los botones de acción -->
+           <div class="botones-accion-carrito" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:5px;">
+               <!-- 1. PENDIENTE (Cocina) -->
+               <button onclick="guardarPedidoTemporal()" class="btn-secundario" title="Cocina"><i class="fas fa-utensils"></i></button>
+               <!-- 2. PRE-CUENTA (Imprimir sin cerrar) -->
+               <button onclick="imprimirPreCuenta()" class="btn-gray" title="Pre-Cuenta" style="background:#6c757d; color:white; border-radius:10px; border:none;"><i class="fas fa-file-invoice"></i></button>
+               <!-- 3. ANULAR -->
+               <button onclick="anularCuentaActual()" class="btn-anular" title="Anular"><i class="fas fa-trash-alt"></i></button>
+               <!-- 4. COBRAR -->
+               <button onclick="finalizarVenta()" class="btn-exito" title="Cobrar"><i class="fas fa-check-circle"></i></button>
             </div>
         </div>
     </section>
@@ -81,26 +87,39 @@
     </div>
 </div>
 
-<!-- MODAL PAGO -->
+<!-- Modal de Pago (Actualizado para Pagos Combinados) -->
 <div id="modal-metodo-pago" class="modal">
-    <div class="contenido-modal" style="max-width: 400px;">
-        <header class="header-modal"><h2>PAGO</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
+    <div class="contenido-modal" style="max-width: 450px;">
+        <header class="header-modal"><h2>FINALIZAR CUENTA</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
         <div style="padding: 20px; text-align: center;">
-            <div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px; display:flex; gap:5px;">
-                <input type="text" id="cliente-nombre" placeholder="Nombre Cliente" style="flex:2; padding:5px;">
-                <input type="text" id="cliente-tel" placeholder="Tel" style="flex:1; padding:5px;">
+            <h1 id="pago-total-final" style="font-size:2.5rem; margin-bottom:0;"></h1>
+            <h2 id="pago-total-usd" style="color:#457b9d; margin-top:0;"></h2>
+            
+            <div style="background:#f1faee; padding:10px; border-radius:12px; margin-bottom:15px; border:1px solid #ddd;">
+                <label>Propina (10%):</label>
+                <input type="number" id="input-propina" oninput="actualizarTotalConPropina()" style="width:100px; text-align:center; font-size:1.1rem;">
             </div>
-            <p>Subtotal: <span id="pago-subtotal" style="font-weight:bold;"></span></p>
-            <div style="background:#f1faee; padding:10px; border-radius:12px; margin:10px 0; border:1px solid #ddd;">
-                <label>Propina (10%):</label><br>
-                <input type="number" id="input-propina" oninput="actualizarTotalConPropina()" style="width:120px; font-size:1.2rem; text-align:center;">
+
+            <div id="seccion-pago-simple">
+                <p>Método de Pago:</p>
+                <div style="display:grid; gap:8px;">
+                    <button onclick="confirmarVentaFinal('Efectivo')" class="btn-pago" style="background:#2a9d8f; color:white;">EFECTIVO</button>
+                    <button onclick="confirmarVentaFinal('Tarjeta')" class="btn-pago" style="background:#457b9d; color:white;">TARJETA</button>
+                    <button onclick="confirmarVentaFinal('Transferencia')" class="btn-pago" style="background:#1d3557; color:white;">TRANSFERENCIA</button>
+                    <button onclick="activarPagoCombinado()" class="btn-pago" style="background:#6c757d; color:white;">PAGO COMBINADO</button>
+                </div>
             </div>
-            <h1 id="pago-total-final" style="margin:5px 0;"></h1>
-            <h2 id="pago-total-usd" style="color:#457b9d; margin:0;"></h2>
-            <div style="display:grid; gap:8px; margin-top:15px;">
-                <button onclick="confirmarVentaFinal('Efectivo')" class="btn-pago" style="background:#2a9d8f; color:white;">EFECTIVO</button>
-                <button onclick="confirmarVentaFinal('Tarjeta')" class="btn-pago" style="background:#457b9d; color:white;">TARJETA</button>
-                <button onclick="confirmarVentaFinal('Transferencia')" class="btn-pago" style="background:#1d3557; color:white;">TRANSF.</button>
+
+            <!-- Panel de Pago Combinado (Oculto por defecto) -->
+            <div id="seccion-pago-combinado" style="display:none; background:#f8f9fa; padding:15px; border-radius:15px; border:1px solid #ccc;">
+                <h4>Desglose de Pago</h4>
+                <div style="display:grid; gap:10px; text-align:left;">
+                    <label>💵 Efectivo (C$):</label><input type="number" id="split-efectivo" value="0" oninput="validarSumaCombinada()">
+                    <label>💳 Tarjeta (C$):</label><input type="number" id="split-tarjeta" value="0" oninput="validarSumaCombinada()">
+                    <label>🏦 Transf. (C$):</label><input type="number" id="split-transf" value="0" oninput="validarSumaCombinada()">
+                </div>
+                <div id="combinado-aviso" style="margin-top:10px; font-weight:bold; color:red;">Faltan: C$ 0.00</div>
+                <button id="btn-confirmar-combinado" onclick="confirmarVentaFinal('Combinado')" class="btn-exito" style="width:100%; margin-top:10px;" disabled>CONFIRMAR PAGO</button>
             </div>
         </div>
     </div>

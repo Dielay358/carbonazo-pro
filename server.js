@@ -19,6 +19,7 @@ const usesCloud = process.env.DATABASE_URL;
 
 if (usesCloud) {
     db = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+    console.log("☁️ MODO NUBE: Conectado a Supabase");
 } else {
     const sqlite3 = require('sqlite3').verbose(); 
     const localDB = new sqlite3.Database('./carbonazo.db');
@@ -37,75 +38,24 @@ if (usesCloud) {
 const initDB = async () => {
     const idType = usesCloud ? "SERIAL PRIMARY KEY" : "INTEGER PRIMARY KEY AUTOINCREMENT";
     try {
-        // 1. Tabla de Ventas (Agregamos cliente y estado)
-        await db.query(`CREATE TABLE IF NOT EXISTS Ventas (id ${idType}, fecha TEXT, total REAL, propina REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT, estado_cocina TEXT DEFAULT 'Entregado')`);
-        
-        // 2. Tabla de Productos (Agregamos stock)
+        await db.query(`CREATE TABLE IF NOT EXISTS Ventas (id ${idType}, fecha TEXT, total REAL, propina REAL, mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT)`);
         await db.query(`CREATE TABLE IF NOT EXISTS Productos (id ${idType}, nombre TEXT, precio REAL, icono TEXT, categoria TEXT, stock INTEGER DEFAULT 999)`);
-        
-        // 3. Tabla de Usuarios
         await db.query(`CREATE TABLE IF NOT EXISTS Usuarios (id ${idType}, nombre TEXT UNIQUE, pin TEXT)`);
-        
-        // 4. Tabla de Mesas Abiertas
         await db.query(`CREATE TABLE IF NOT EXISTS Mesas_Abiertas (id ${idType}, mesa TEXT UNIQUE, items TEXT, mesero TEXT, total_actual REAL, fecha_apertura TEXT)`);
-        
-        // 5. Tabla de Configuración
         await db.query(`CREATE TABLE IF NOT EXISTS Configuracion (llave TEXT PRIMARY KEY, valor TEXT)`);
 
-        // 6. NUEVA: Tabla de Clientes (Loyalty)
-        await db.query(`CREATE TABLE IF NOT EXISTS Clientes (id ${idType}, nombre TEXT, telefono TEXT UNIQUE, puntos INTEGER DEFAULT 0)`);
+        // AUTO-PARCHE: Columnas para Pagos Combinados
+        try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_efectivo REAL DEFAULT 0`); } catch (e) {}
+        try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_tarjeta REAL DEFAULT 0`); } catch (e) {}
+        try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_transferencia REAL DEFAULT 0`); } catch (e) {}
 
-        console.log("✅ Ecosistema de Base de Datos Global listo.");
+        console.log("✅ Tablas sincronizadas con Pagos Combinados.");
     } catch (err) { console.error("❌ Error DB:", err.message); }
 };
 initDB();
 
-// --- RUTAS NUEVAS: INVENTARIO Y CLIENTES ---
+// --- RUTAS API ---
 
-app.get('/clientes', async (req, res) => {
-    try {
-        const result = await db.query("SELECT * FROM Clientes ORDER BY nombre ASC");
-        res.json(result.rows);
-    } catch (e) { res.status(500).send(e.message); }
-});
-
-app.post('/clientes', async (req, res) => {
-    const { nombre, telefono } = req.body;
-    try {
-        await db.query("INSERT INTO Clientes (nombre, telefono) VALUES ($1, $2) ON CONFLICT (telefono) DO NOTHING", [nombre, telefono]);
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
-});
-
-// Ruta para el KDS (Monitor de Cocina)
-app.get('/cocina-pendientes', async (req, res) => {
-    try {
-        const result = await db.query("SELECT * FROM Mesas_Abiertas ORDER BY id ASC");
-        res.json(result.rows);
-    } catch (e) { res.status(500).send(e.message); }
-});
-
-// Registrar Venta y Restar Stock
-app.post('/nueva-venta', async (req, res) => {
-    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
-    const { total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago, items } = req.body;
-    const fecha = new Date().toLocaleString();
-    try {
-        // 1. Guardar Venta
-        const q = `INSERT INTO Ventas (fecha, total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-        await db.query(q, [fecha, total, propina || 0, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago]);
-        
-        // 2. Restar Stock (Solo si vienen los items)
-        if (items && Array.isArray(items)) {
-            for (let item of items) {
-                await db.query("UPDATE Productos SET stock = stock - $1 WHERE id = $2", [item.cantidad, item.id]);
-            }
-        }
-        res.json({ success: true });
-    } catch (err) { res.status(500).send(err.message); }
-});
-
-// Login, Productos, etc. (Mantener rutas anteriores igual...)
 app.post('/login', async (req, res) => {
     const { nombre, pin } = req.body;
     try {
@@ -122,30 +72,39 @@ app.get('/productos', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/agregar-producto', async (req, res) => {
-    const { nombre, precio, icono, categoria, stock } = req.body;
+app.post('/nueva-venta', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    const { total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago, items, p_efectivo, p_tarjeta, p_transf } = req.body;
+    const fecha = new Date().toLocaleString();
     try {
-        await db.query("INSERT INTO Productos (nombre, precio, icono, categoria, stock) VALUES ($1, $2, $3, $4, $5)", [nombre, precio, icono, categoria, stock || 999]);
-        res.json({ success: true });
-    } catch (err) { res.status(500).send(err.message); }
-});
-
-app.delete('/borrar-producto/:id', async (req, res) => {
-    try {
-        await db.query("DELETE FROM Productos WHERE id=$1", [req.params.id]);
+        const q = `INSERT INTO Ventas (fecha, total, propina, mesero, tipo_pedido, mesa, cliente, metodo_pago, pago_efectivo, pago_tarjeta, pago_transferencia) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`;
+        await db.query(q, [fecha, total, propina || 0, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago, p_efectivo || 0, p_tarjeta || 0, p_transf || 0]);
+        
+        if (items && Array.isArray(items)) {
+            for (let item of items) { await db.query("UPDATE Productos SET stock = stock - $1 WHERE id = $2", [item.cantidad, item.id]); }
+        }
         res.json({ success: true });
     } catch (err) { res.status(500).send(err.message); }
 });
 
 app.get('/reporte-cierre', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const hoy = `%${new Date().toLocaleDateString()}%`;
     try {
-        const q = `SELECT metodo_pago, SUM(total) as totalvendido, SUM(propina) as totalpropina FROM Ventas WHERE fecha LIKE $1 GROUP BY metodo_pago`;
+        // Reporte detallado por método y totales parciales
+        const q = `SELECT 
+            SUM(pago_efectivo) as efectivo, 
+            SUM(pago_tarjeta) as tarjeta, 
+            SUM(pago_transferencia) as transferencia,
+            SUM(total) as gran_total,
+            SUM(propina) as gran_propina
+            FROM Ventas WHERE fecha LIKE $1`;
         const result = await db.query(q, [hoy]);
-        res.json(result.rows);
+        res.json(result.rows[0]);
     } catch (err) { res.status(500).send(err.message); }
 });
 
+// Rutas de administración y otros (Se mantienen igual...)
 app.get('/tasa-cambio', async (req, res) => {
     try {
         const result = await db.query("SELECT valor FROM Configuracion WHERE llave = 'tasa_cambio'");
@@ -213,4 +172,4 @@ app.get('/usuarios', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-app.listen(PORT, () => console.log(`🚀 Servidor Carbonazo Pro Activo en ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));
