@@ -398,3 +398,25 @@ header {
 @keyframes blink { 
     0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } 
 }
+
+.logo-menu { 
+            width: 220px; /* Tamaño ideal */
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5)); /* Sombra para resaltar */
+            animation: aparecerLogo 1.5s ease-out;
+        }
+
+        @keyframes aparecerLogo {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .hero { 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1000'); /* Imagen de fondo de carbón encendido */
+            background-size: cover; 
+            background-position: center;
+            text-align: center; 
+            padding: 60px 20px; 
+            border-bottom: 5px solid var(--rojo);
+        }
