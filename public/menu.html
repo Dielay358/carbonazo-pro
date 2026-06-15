@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - Asados El Carbonazo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --rojo: #e63946; --dorado: #ffd166; --fondo: #121212; }
+        body { 
+            background: var(--fondo); 
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); /* Textura de carbón */
+            color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px;
+        }
+        .hero { 
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000');
+            background-size: cover; text-align: center; padding: 40px 20px; border-bottom: 5px solid var(--rojo);
+        }
+        .logo-menu { width: 180px; filter: drop-shadow(0 0 10px rgba(230, 57, 70, 0.8)); }
+        
+        .categoria-section { padding: 20px; }
+        .categoria-titulo { 
+            color: var(--rojo); text-transform: uppercase; border-left: 5px solid var(--rojo); 
+            padding-left: 15px; margin-bottom: 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;
+        }
+        .grid-menu { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        
+        .item-menu {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;
+            border-bottom: 1px solid rgba(230, 57, 70, 0.3);
+        }
+        .item-info h3 { margin: 0; font-size: 1.1rem; color: #eee; }
+        .item-precio { color: var(--dorado); font-weight: bold; font-size: 1.2rem; min-width: 100px; text-align: right; }
+        
+        .fire-badge { background: var(--rojo); color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.7rem; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <img src="tu_logo_url_aqui.png" alt="Asados El Carbonazo" class="logo-menu">
+        <h1 style="margin-top:10px;">MENÚ DIGITAL</h1>
+        <p style="color: var(--dorado);">¡Los mejores asados desde 2015!</p>
+    </div>
+
+    <div id="contenido-menu">
+        <!-- Se carga dinámicamente -->
+    </div>
+
+    <script>
+        async function cargarMenuPublico() {
+            const res = await fetch(window.location.origin + '/productos');
+            const prods = await res.json();
+            const cont = document.getElementById('contenido-menu');
+            
+            // Agrupar por categoría
+            const categorias = [...new Set(prods.map(p => p.categoria))];
+            
+            cont.innerHTML = categorias.map(cat => `
+                <div class="categoria-section">
+                    <h2 class="categoria-titulo"><i class="fas fa-fire"></i> ${cat}</h2>
+                    <div class="grid-menu">
+                        ${prods.filter(p => p.categoria === cat).map(p => `
+                            <div class="item-menu">
+                                <div class="item-info">
+                                    <h3>${p.icono} ${p.nombre} ${p.stock < 10 ? '<span class="fire-badge">¡ÚLTIMOS!</span>' : ''}</h3>
+                                </div>
+                                <div class="item-precio">C$ ${p.precio}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        cargarMenuPublico();
+    </script>
+</body>
+</html>

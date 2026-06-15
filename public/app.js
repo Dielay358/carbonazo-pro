@@ -197,10 +197,14 @@ function finalizarVenta() {
 }
 
 function actualizarTotalConPropina() {
-    const p = parseFloat(document.getElementById('input-propina').value) || 0;
-    const tN = totalVentaSinPropina + p;
-    document.getElementById('pago-total-final').innerText = `C$ ${tN.toFixed(2)}`;
-    document.getElementById('pago-total-usd').innerText = `$ ${(tN / tasaCambio).toFixed(2)}`;
+    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
+    const descuento = parseFloat(document.getElementById('input-descuento').value) || 0;
+    
+    const totalNIO = (totalVentaSinPropina - descuento) + propina;
+    const totalUSD = totalNIO / tasaCambio;
+
+    document.getElementById('pago-total-final').innerText = `C$ ${totalNIO.toFixed(2)}`;
+    document.getElementById('pago-total-usd').innerText = `$ ${totalUSD.toFixed(2)}`;
 }
 
 async function confirmarVentaFinal(metodo) {

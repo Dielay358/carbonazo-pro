@@ -97,7 +97,10 @@
             
             <div style="background:#f1faee; padding:10px; border-radius:12px; margin-bottom:15px; border:1px solid #ddd;">
                 <label>Propina (10%):</label>
-                <input type="number" id="input-propina" oninput="actualizarTotalConPropina()" style="width:100px; text-align:center; font-size:1.1rem;">
+            <div style="background:#fff3f3; padding:10px; border-radius:12px; margin-bottom:10px; border:1px solid #ffcccc;">
+                <label style="color:var(--primario); font-weight:bold;">Descuento (C$):</label>
+                <input type="number" id="input-descuento" oninput="actualizarTotalConPropina()" value="0" style="width:100px; text-align:center; border:1px solid var(--primario);">
+            </div>
             </div>
 
             <div id="seccion-pago-simple">

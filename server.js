@@ -48,6 +48,7 @@ const initDB = async () => {
         try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_efectivo REAL DEFAULT 0`); } catch (e) {}
         try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_tarjeta REAL DEFAULT 0`); } catch (e) {}
         try { await db.query(`ALTER TABLE Ventas ADD COLUMN pago_transferencia REAL DEFAULT 0`); } catch (e) {}
+        try { await db.query(`ALTER TABLE Ventas ADD COLUMN descuento REAL DEFAULT 0`); } catch (e) {}
 
         console.log("✅ Tablas sincronizadas con Pagos Combinados.");
     } catch (err) { console.error("❌ Error DB:", err.message); }
@@ -70,6 +71,23 @@ app.get('/productos', async (req, res) => {
         const result = await db.query("SELECT * FROM Productos ORDER BY categoria, nombre");
         res.json(result.rows);
     } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/top-productos', async (req, res) => {
+    try {
+        const q = `SELECT nombre, SUM(cantidad) as total_vendido 
+                   FROM (SELECT json_array_elements(items::json)::json->>'nombre' as nombre, 
+                                (json_array_elements(items::json)::json->>'cantidad')::int as cantidad 
+                         FROM Mesas_Abiertas UNION ALL 
+                         SELECT 'Venta Cerrada' as nombre, 0 as cantidad) as t 
+                   GROUP BY nombre ORDER BY total_vendido DESC LIMIT 5`;
+        // Nota: En SQLite la consulta es diferente, esta es para PostgreSQL (Supabase)
+        const result = await db.query(`
+            SELECT nombre, COUNT(*) as veces_pedido 
+            FROM Ventas, json_array_elements(items::json) as item 
+            GROUP BY nombre ORDER BY veces_pedido DESC LIMIT 10`);
+        res.json(result.rows);
+    } catch (e) { res.json([]); }
 });
 
 app.post('/nueva-venta', async (req, res) => {
