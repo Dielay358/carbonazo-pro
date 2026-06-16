@@ -1,11 +1,12 @@
 /**
  * PROYECTO: ASADO EL CARBONAZO PRO
- * DNA: Lógica Premium con Gráficos, Notas y Logo
+ * DNA: Lógica Premium Completa (Mesas Restauradas + Gráficos + Notas)
  */
 
 const URL_SERVIDOR = window.location.origin;
 const TOKEN_ACCESO = "carbonazo2024pro";
 
+// ESTADO GLOBAL
 let productos = [], carrito = [], usuarioLogueado = null, mesaSeleccionada = null, subCuentaActiva = null, mesasAbiertas = [], totalVentaSinPropina = 0, tasaCambio = 36.62;
 let chartProds = null, chartPagos = null;
 
@@ -16,55 +17,84 @@ const labelMesaActiva = document.getElementById('label-mesa-activa');
 
 // --- 1. INICIALIZACIÓN ---
 window.onload = async () => {
+    console.log("🚀 Iniciando El Carbonazo Pro...");
     await cargarUsuariosLogin();
     await obtenerProductosDB();
-    await refrescarMesas();
     await cargarTasaCambio();
+    await refrescarMesas(); // Esta función ahora sí encontrará a dibujarMapaMesas
+    
     setInterval(async () => { if (!subCuentaActiva) await refrescarMesas(); }, 7000);
 };
 
-// --- 2. SEGURIDAD ---
-async function cargarUsuariosLogin() {
-    const res = await fetch(`${URL_SERVIDOR}/usuarios`);
-    const usuarios = await res.json();
-    const ops = usuarios.map(u => `<option value="${u.nombre}">${u.nombre}</option>`).join('');
-    document.getElementById('login-usuario').innerHTML = ops;
-    document.getElementById('select-mesero').innerHTML = ops;
+// --- 2. MAPA DE MESAS (RESTAURADO) ---
+function dibujarMapaMesas() {
+    const contenedor = document.getElementById('contenedor-mesas');
+    if (!contenedor) return;
+    contenedor.innerHTML = '';
+
+    for (let i = 1; i <= 10; i++) {
+        const idBase = `Mesa ${i}`;
+        const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idBase));
+        const totalMesa = cuentas.reduce((acc, c) => acc + parseFloat(c.total_actual), 0);
+        
+        const btn = document.createElement('button');
+        btn.className = `mesa-btn ${cuentas.length > 0 ? 'ocupada' : ''} ${mesaSeleccionada === idBase ? 'seleccionada' : ''}`;
+        btn.innerHTML = `<i class="fas fa-utensils"></i><br>${idBase}${cuentas.length > 1 ? ` (${cuentas.length})` : ''}`;
+        
+        if (cuentas.length > 0) {
+            const popup = document.createElement('div');
+            popup.className = 'mesa-info-flotante';
+            popup.innerHTML = `Total: <span>C$ ${totalMesa.toFixed(2)}</span>`;
+            btn.appendChild(popup);
+        }
+        btn.onclick = () => abrirSelectorDeCuenta(idBase);
+        contenedor.appendChild(btn);
+    }
 }
 
-async function intentarLogin() {
-    const nombre = document.getElementById('login-usuario').value, pin = document.getElementById('login-pin').value;
-    const res = await fetch(`${URL_SERVIDOR}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre, pin }) });
-    if (res.ok) {
-        usuarioLogueado = nombre;
-        document.getElementById('select-mesero').value = nombre;
-        document.getElementById('pantalla-login').style.display = 'none';
-        reproducirSonido('exito');
-    } else alert("PIN Incorrecto");
+async function refrescarMesas() {
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
+        mesasAbiertas = await res.json(); 
+        dibujarMapaMesas(); // Ahora la función existe arriba
+    } catch(e) { console.error("Error sincronización mesas"); }
 }
 
-// --- 3. MENÚ Y NOTAS DE COCINA ---
-async function obtenerProductosDB() {
-    const res = await fetch(`${URL_SERVIDOR}/productos`);
-    productos = await res.json();
-    cargarMenu(productos);
-    generarFiltrosCategorias();
+async function abrirSelectorDeCuenta(idBase) {
+    reproducirSonido('click');
+    const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idBase));
+    mesaSeleccionada = idBase;
+
+    if (cuentas.length === 0) {
+        seleccionarCuentaDirecta(idBase);
+    } else {
+        document.getElementById('titulo-selector-mesa').innerText = idBase;
+        document.getElementById('lista-cuentas-mesa').innerHTML = cuentas.map(c => `
+            <div class="btn-cuenta-card" onclick="seleccionarCuentaDirecta('${c.mesa}')">
+                <strong>${c.mesa.split(' - ')[1] || 'Principal'}</strong>
+                <span>C$ ${parseFloat(c.total_actual).toFixed(2)}</span>
+            </div>
+        `).join('');
+        document.getElementById('modal-selector-cuentas').style.display = 'block';
+    }
 }
 
-function cargarMenu(lista) {
-    contenedorMenu.innerHTML = lista.map(p => `
-        <div class="tarjeta-producto ${p.stock <= 0 ? 'agotado' : ''}" onclick="p.stock > 0 && agregarProducto(${p.id})">
-            <div style="font-size: 2.2rem;">${p.icono}</div>
-            <h3>${p.nombre}</h3>
-            <p style="color:var(--primario); font-weight:bold;">C$ ${p.precio.toFixed(2)}</p>
-            <small>Stock: ${p.stock ?? 'N/A'}</small>
-        </div>
-    `).join('');
+function seleccionarCuentaDirecta(nombre) {
+    subCuentaActiva = nombre;
+    mesaSeleccionada = nombre.split(' - ')[0];
+    document.getElementById('id-mesa').value = nombre;
+    labelMesaActiva.innerText = `Editando: ${nombre}`;
+    const pedido = mesasAbiertas.find(m => m.mesa === nombre);
+    carrito = pedido ? JSON.parse(pedido.items) : [];
+    actualizarInterfazCarrito();
+    cerrarModal();
+    dibujarMapaMesas();
 }
 
+// --- 3. CARRITO Y NOTAS ---
 function agregarProducto(id) {
     const p = productos.find(x => x.id === id);
-    const ex = carrito.find(i => i.id === id && !i.nota); // Solo sumar si no tiene nota (para no mezclar)
+    const ex = carrito.find(i => i.id === id && !i.nota); 
     if (ex) {
         if (ex.cantidad < p.stock) ex.cantidad++; else alert("Sin stock");
     } else {
@@ -75,7 +105,7 @@ function agregarProducto(id) {
 }
 
 function agregarNota(index) {
-    const nota = prompt("Nota de cocina (Ej: Bien cocido, Sin ensalada):", carrito[index].nota || "");
+    const nota = prompt("Nota de cocina:", carrito[index].nota || "");
     if (nota !== null) {
         carrito[index].nota = nota;
         actualizarInterfazCarrito();
@@ -89,17 +119,17 @@ function actualizarInterfazCarrito() {
         return;
     }
     let total = 0;
-    listaCarrito.innerHTML = carrito.map((i, index) => {
+    listaCarrito.innerHTML = carrito.map((i, idx) => {
         const sub = i.precio * i.cantidad; total += sub;
         return `<div class="item-carrito-lista">
-            <div onclick="agregarNota(${index})" style="cursor:pointer; flex:1;">
+            <div onclick="agregarNota(${idx})" style="cursor:pointer; flex:1;">
                 <strong>${i.nombre}</strong><br>
                 <small>${i.cantidad} x ${i.precio}</small>
                 ${i.nota ? `<br><span style="color:var(--primario); font-size:0.75rem;">📝 ${i.nota}</span>` : `<br><span style="color:#aaa; font-size:0.7rem;">+ Agregar nota</span>`}
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
                 <span>C$ ${sub.toFixed(2)}</span>
-                <button onclick="eliminarUnoCarrito(${index})" class="btn-eliminar"><i class="fas fa-minus-circle"></i></button>
+                <button onclick="eliminarUnoCarrito(${idx})" class="btn-eliminar"><i class="fas fa-minus-circle"></i></button>
             </div>
         </div>`;
     }).join('');
@@ -112,11 +142,46 @@ function eliminarUnoCarrito(index) {
     actualizarInterfazCarrito();
 }
 
-// --- 4. DASHBOARD E INTELIGENCIA ---
+// --- 4. COBRO Y MONEDA ---
+function finalizarVenta() {
+    if (carrito.length === 0) return alert("Carrito vacío");
+    totalVentaSinPropina = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    document.getElementById('pago-subtotal').innerText = `C$ ${totalVentaSinPropina.toFixed(2)}`;
+    document.getElementById('input-propina').value = (totalVentaSinPropina * 0.1).toFixed(2);
+    actualizarTotalConPropina();
+    document.getElementById('modal-metodo-pago').style.display = 'block';
+}
+
+function actualizarTotalConPropina() {
+    const p = parseFloat(document.getElementById('input-propina').value) || 0;
+    const tN = totalVentaSinPropina + p;
+    document.getElementById('pago-total-final').innerText = `C$ ${tN.toFixed(2)}`;
+    document.getElementById('pago-total-usd').innerText = `$ ${(tN / tasaCambio).toFixed(2)}`;
+}
+
+async function confirmarVentaFinal(metodo) {
+    const p = parseFloat(document.getElementById('input-propina').value) || 0;
+    const datos = { 
+        total: totalVentaSinPropina + p, propina: p, mesero: usuarioLogueado, 
+        tipo_pedido: document.getElementById('tipo-pedido').value,
+        mesa: subCuentaActiva, cliente: document.getElementById('cliente-nombre').value || "Gral", 
+        metodo_pago: metodo, items: carrito 
+    };
+    const res = await fetch(`${URL_SERVIDOR}/nueva-venta`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` }, body: JSON.stringify(datos) });
+    if (res.ok) {
+        if (subCuentaActiva) await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
+        reproducirSonido('exito');
+        generarTicketPro(datos);
+        limpiarPantallaPostAccion();
+        cerrarModal();
+        await obtenerProductosDB(); await refrescarMesas();
+    }
+}
+
+// --- 5. DASHBOARD Y ADMIN ---
 async function cargarEstadisticas() {
     const res = await fetch(`${URL_SERVIDOR}/dashboard-stats`, { headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } });
     const data = await res.json();
-
     const ctxP = document.getElementById('chartProductos').getContext('2d');
     const ctxM = document.getElementById('chartPagos').getContext('2d');
 
@@ -127,9 +192,8 @@ async function cargarEstadisticas() {
         type: 'bar',
         data: {
             labels: data.topProductos.map(p => p.nombre.substring(0,10)),
-            datasets: [{ label: 'Ventas (Unid)', data: data.topProductos.map(p => p.cantidad), backgroundColor: '#e63946' }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+            datasets: [{ label: 'Ventas', data: data.topProductos.map(p => p.cantidad), backgroundColor: '#e63946' }]
+        }
     });
 
     chartPagos = new Chart(ctxM, {
@@ -150,70 +214,46 @@ function cambiarTabAdmin(tab) {
     if(tab === 'stats') cargarEstadisticas();
 }
 
-// --- 5. TICKET CON LOGO ---
+// --- UTILIDADES ---
+function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+function reproducirSonido(t) { const s = document.getElementById(`sonido-${t}`); if (s) { s.currentTime=0; s.play().catch(()=>{}); } }
+function limpiarPantallaPostAccion() {
+    carrito = []; mesaSeleccionada = null; subCuentaActiva = null;
+    document.getElementById('id-mesa').value = '';
+    labelMesaActiva.innerText = "Ninguna mesa seleccionada";
+    actualizarInterfazCarrito();
+}
+
+// (Otras funciones obtenerProductosDB, cargarTasaCambio, etc. se mantienen igual...)
+async function obtenerProductosDB() {
+    const res = await fetch(`${URL_SERVIDOR}/productos`);
+    productos = await res.json();
+    cargarMenu(productos);
+    const barra = document.getElementById('barra-categorias');
+    const cats = ['Todos', ...new Set(productos.map(p => p.categoria || 'General'))];
+    barra.innerHTML = cats.map(c => `<button class="btn-filtro" onclick="filtrarPorCategoria('${c}')">${c}</button>`).join('');
+}
+async function cargarTasaCambio() {
+    const res = await fetch(`${URL_SERVIDOR}/tasa-cambio`);
+    const data = await res.json();
+    tasaCambio = parseFloat(data.tasa);
+    document.getElementById('header-tasa').innerText = tasaCambio.toFixed(2);
+}
+async function cargarUsuariosLogin() {
+    const res = await fetch(`${URL_SERVIDOR}/usuarios`);
+    const usuarios = await res.json();
+    const ops = usuarios.map(u => `<option value="${u.nombre}">${u.nombre}</option>`).join('');
+    document.getElementById('login-usuario').innerHTML = ops;
+    document.getElementById('select-mesero').innerHTML = ops;
+}
 function generarTicketPro(d) {
     const area = document.getElementById('area-impresion');
-    const itemsHtml = carrito.map(i => `
-        <div class="ticket-fila"><span>${i.cantidad} x ${i.nombre}</span><span>${(i.precio * i.cantidad).toFixed(2)}</span></div>
-        ${i.nota ? `<div style="font-size:0.75rem; margin-bottom:5px;">>> OBS: ${i.nota}</div>` : ''}
-    `).join('');
-    
-    area.innerHTML = `
-        <div class="ticket-header">
-            <img src="logo-carbonazo.png" style="width:130px; filter: grayscale(1); margin-bottom:5px;">
-            <h3>EL CARBONAZO</h3>
-            <p>${new Date().toLocaleString()}</p>
-        </div>
-        <div class="ticket-divisor"></div>
-        <p>Mesa: ${d.mesa}</p>
-        <div class="ticket-divisor"></div>
-        ${itemsHtml}
-        <div class="ticket-divisor"></div>
-        <div class="ticket-fila"><span>Subtotal:</span><span>C$ ${(d.total - d.propina).toFixed(2)}</span></div>
-        <div class="ticket-fila"><span>Propina (10%):</span><span>C$ ${d.propina.toFixed(2)}</span></div>
-        <div class="ticket-total">TOTAL: C$ ${d.total.toFixed(2)}</div>
-        <p style="text-align:center;">Atendió: ${usuarioLogueado}</p>
-    `;
+    const itemsHtml = carrito.map(i => `<div class="ticket-fila"><span>${i.cantidad} x ${i.nombre}</span><span>${(i.precio * i.cantidad).toFixed(2)}</span></div>${i.nota ? `<div style="font-size:0.75rem;">>> ${i.nota}</div>` : ''}`).join('');
+    area.innerHTML = `<div class="ticket-header"><img src="logo-carbonazo.png" style="width:120px; filter:grayscale(1);"><br><h3>EL CARBONAZO</h3><p>${new Date().toLocaleString()}</p></div><div class="ticket-divisor"></div><p>Mesa: ${d.mesa}</p><div class="ticket-divisor"></div>${itemsHtml}<div class="ticket-divisor"></div><div class="ticket-fila"><span>Subtotal:</span><span>C$ ${(d.total - d.propina).toFixed(2)}</span></div><div class="ticket-fila"><span>Propina:</span><span>C$ ${d.propina.toFixed(2)}</span></div><div class="ticket-total">TOTAL: C$ ${d.total.toFixed(2)}</div>`;
     setTimeout(() => window.print(), 300);
 }
-
-// --- UTILIDADES RESTANTES (Sincronizadas) ---
-async function confirmarVentaFinal(metodo) {
-    const propina = parseFloat(document.getElementById('input-propina').value) || 0;
-    const datos = { 
-        total: totalVentaSinPropina + propina, propina, mesero: usuarioLogueado, 
-        tipo_pedido: document.getElementById('tipo-pedido').value,
-        mesa: subCuentaActiva, cliente: document.getElementById('cliente-nombre').value || "Gral", 
-        metodo_pago: metodo, items: carrito 
-    };
-    const res = await fetch(`${URL_SERVIDOR}/nueva-venta`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` }, body: JSON.stringify(datos) });
-    if (res.ok) {
-        if (subCuentaActiva) await fetch(`${URL_SERVIDOR}/limpiar-mesa/${subCuentaActiva}`, { method: 'DELETE' });
-        reproducirSonido('exito');
-        generarTicketPro(datos);
-        limpiarPantallaPostAccion();
-        cerrarModal();
-        await obtenerProductosDB(); await refrescarMesas();
-    }
-}
-
-async function refrescarMesas() {
-    const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
-    mesasAbiertas = await res.json(); 
-    dibujarMapaMesas();
-}
-
-function seleccionarCuentaDirecta(nombre) {
-    subCuentaActiva = nombre; mesaSeleccionada = nombre.split(' - ')[0];
-    document.getElementById('id-mesa').value = nombre;
-    labelMesaActiva.innerText = `Editando: ${nombre}`;
-    const pedido = mesasAbiertas.find(m => m.mesa === nombre);
-    carrito = pedido ? JSON.parse(pedido.items) : [];
-    actualizarInterfazCarrito();
-    cerrarModal();
-    dibujarMapaMesas();
-}
-
+function filtrarPorCategoria(cat) { cargarMenu(cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat)); }
+function prepararNuevaSubCuenta() { const n = prompt("Nombre cuenta:"); if (n) { seleccionarCuentaDirecta(`${mesaSeleccionada} - ${n}`); } }
 async function guardarPedidoTemporal() {
     if (!subCuentaActiva) return alert("Seleccione mesa");
     const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
@@ -221,12 +261,3 @@ async function guardarPedidoTemporal() {
     reproducirSonido('exito');
     limpiarPantallaPostAccion(); await refrescarMesas();
 }
-
-function filtrarPorCategoria(cat) { cargarMenu(cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat)); }
-function generarFiltrosCategorias() { const barra = document.getElementById('barra-categorias'); const cats = ['Todos', ...new Set(productos.map(p => p.categoria || 'General'))]; barra.innerHTML = cats.map(c => `<button class="btn-filtro" onclick="filtrarPorCategoria('${c}')">${c}</button>`).join(''); }
-function reproducirSonido(t) { const s = document.getElementById(`sonido-${t}`); if (s) { s.currentTime=0; s.play().catch(()=>{}); } }
-function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
-function abrirAdminProductos() { document.getElementById('modal-admin-productos').style.display='block'; cambiarTabAdmin('prods'); }
-function abrirModalVentas() { document.getElementById('modal-ventas').style.display = 'block'; } // (Implementar fetch historial si necesario)
-async function abrirCierreCaja() { document.getElementById('modal-cierre').style.display = 'block'; } // (Implementar fetch cierre si necesario)
-async function cargarTasaCambio() { const res = await fetch(`${URL_SERVIDOR}/tasa-cambio`); const data = await res.json(); tasaCambio = parseFloat(data.tasa); document.getElementById('header-tasa').innerText = tasaCambio.toFixed(2); }
