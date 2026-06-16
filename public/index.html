@@ -6,17 +6,16 @@
     <title>POS El Carbonazo Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Librería para Gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<!-- A. SELECTOR DE ROL (PRIVACIDAD) -->
+<!-- A. SELECTOR DE ROL (ENTRADA) -->
 <div id="pantalla-inicio-rol" class="login-overlay">
     <div class="login-box">
         <i class="fas fa-fire" style="font-size: 3rem; color: var(--primario);"></i>
         <h2>El Carbonazo PRO</h2>
-        <p>¿Cómo desea ingresar?</p>
+        <p>Seleccione modo de ingreso:</p>
         <div style="display: grid; gap: 15px;">
             <button onclick="entrarComoMesero()" class="btn-pago" style="background: var(--oscuro); color:white;">
                 <i class="fas fa-utensils"></i> MODO MESERO
@@ -52,7 +51,6 @@
     </div>
 </header>
 
-<!-- MAPA DE MESAS (RESTAURADO) -->
 <section id="contenedor-mesas" class="mapa-mesas"></section>
 
 <main class="contenedor-principal">
@@ -100,17 +98,17 @@
 </div>
 
 <div id="modal-metodo-pago" class="modal">
-    <div class="contenido-modal" style="max-width: 450px;">
-        <header class="header-modal"><h2>FINALIZAR CUENTA</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
+    <div class="contenido-modal" style="max-width: 400px;">
+        <header class="header-modal">
+            <h2><i class="fas fa-file-invoice-dollar"></i> Finalizar Cuenta</h2>
+            <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
+        </header>
         <div style="padding: 20px; text-align: center;">
-            <!-- CRM CLIENTES -->
-            <div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px;">
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="cliente-nombre" placeholder="Nombre Cliente" style="flex:2;">
-                    <input type="text" id="cliente-tel" placeholder="Celular" style="flex:1;" onchange="buscarPuntos()">
-                </div>
-                <div id="cliente-puntos-aviso" style="font-size:0.75rem; color:#457b9d; margin-top:5px; font-weight:bold;"></div>
+            <div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px; display:flex; gap:5px;">
+                <input type="text" id="cliente-nombre" placeholder="Cliente" style="flex:2;">
+                <input type="text" id="cliente-tel" placeholder="Tel" style="flex:1;" onchange="buscarPuntos()">
             </div>
+            <div id="cliente-puntos-aviso" style="font-size:0.75rem; color:#457b9d; margin-bottom:10px; font-weight:bold;"></div>
 
             <h1 id="pago-total-final" style="font-size:2.5rem; margin-bottom:0;"></h1>
             <h2 id="pago-total-usd" style="color:#457b9d; margin-top:0;"></h2>
@@ -124,18 +122,20 @@
 
             <div id="seccion-pago-simple">
                 <div style="display:grid; gap:8px;">
-                    <button onclick="confirmarVentaFinal('Efectivo')" class="btn-pago" style="background:#2a9d8f; color:white;">EFECTIVO</button>
-                    <button onclick="confirmarVentaFinal('Tarjeta')" class="btn-pago" style="background:#457b9d; color:white;">TARJETA</button>
-                    <button onclick="confirmarVentaFinal('Transferencia')" class="btn-pago" style="background:#1d3557; color:white;">TRANSF.</button>
+                    <button onclick="confirmarVentaFinal('Efectivo')" class="btn-pago" style="background:#2a9d8f; color:white;"><i class="fas fa-money-bill-wave"></i> EFECTIVO</button>
+                    <button onclick="confirmarVentaFinal('Tarjeta')" class="btn-pago" style="background:#457b9d; color:white;"><i class="fas fa-credit-card"></i> TARJETA</button>
+                    <button onclick="confirmarVentaFinal('Transferencia')" class="btn-pago" style="background:#1d3557; color:white;"><i class="fas fa-university"></i> TRANSFERENCIA</button>
                     <button onclick="activarPagoCombinado()" class="btn-pago" style="background:#6c757d; color:white;">PAGO COMBINADO</button>
                 </div>
             </div>
 
             <div id="seccion-pago-combinado" style="display:none; background:#f8f9fa; padding:15px; border-radius:15px; border:1px solid #ccc;">
                 <h4>Desglose</h4>
-                <input type="number" id="split-efectivo" placeholder="Efectivo" oninput="validarSumaCombinada()">
-                <input type="number" id="split-tarjeta" placeholder="Tarjeta" oninput="validarSumaCombinada()">
-                <input type="number" id="split-transf" placeholder="Transf" oninput="validarSumaCombinada()">
+                <div style="display:grid; gap:5px; text-align:left;">
+                    <label>Efectivo:</label><input type="number" id="split-efectivo" value="0" oninput="validarSumaCombinada()">
+                    <label>Tarjeta:</label><input type="number" id="split-tarjeta" value="0" oninput="validarSumaCombinada()">
+                    <label>Transf:</label><input type="number" id="split-transf" value="0" oninput="validarSumaCombinada()">
+                </div>
                 <div id="combinado-aviso" style="margin-top:10px; font-weight:bold; color:red;"></div>
                 <button id="btn-confirmar-combinado" onclick="confirmarVentaFinal('Combinado')" class="btn-exito" style="width:100%; margin-top:10px;" disabled>CONFIRMAR</button>
             </div>
@@ -143,23 +143,20 @@
     </div>
 </div>
 
-<!-- AUDITORÍA Y ADMIN -->
+<!-- MODAL HISTORIAL -->
 <div id="modal-ventas" class="modal">
     <div class="contenido-modal" style="max-width: 700px;">
         <header class="header-modal"><h2>HISTORIAL Y AUDITORÍA</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
-        <div style="background:#eee; padding:10px; display:flex; gap:10px; justify-content:center;">
+        <div style="background:#eee; padding:10px; display:flex; gap:10px; justify-content:center; align-items:center;">
             Desde: <input type="date" id="filtro-inicio"> Hasta: <input type="date" id="filtro-fin">
-            <button onclick="filtrarHistorialAuditoria()" class="btn-secundario" style="padding:5px;">FILTRAR</button>
+            <button onclick="filtrarHistorialAuditoria()" class="btn-secundario" style="padding:5px 15px;">FILTRAR</button>
         </div>
-        <div class="tabla-contenedor">
-            <table id="tabla-ventas">
-                <thead><tr><th>ID</th><th>Fecha</th><th>Mesa</th><th>Mesero</th><th>Total</th><th>Acción</th></tr></thead>
-                <tbody id="cuerpo-tabla-ventas"></tbody>
-            </table>
-        </div>
+        <div class="tabla-contenedor"><table><thead><tr><th>ID</th><th>Fecha</th><th>Mesa</th><th>Mesero</th><th>Total</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-ventas"></tbody></table></div>
+        <div id="total-auditoria" style="padding:15px; text-align:right; font-weight:bold; font-size:1.2rem; background:#f0f0f0;"></div>
     </div>
 </div>
 
+<!-- MODAL ADMIN -->
 <div id="modal-admin-productos" class="modal">
     <div class="contenido-modal">
         <header class="header-modal"><h2>ADMINISTRACIÓN</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
@@ -188,6 +185,7 @@
                 <table style="width:100%;"><tbody id="tabla-admin-usuarios"></tbody></table>
             </div>
             <div id="tab-config" class="admin-tab-content" style="display:none; text-align:center; padding:20px;">
+                <i class="fas fa-university" style="font-size:3rem; color:var(--oscuro);"></i>
                 <p>Tasa de cambio (NIO x 1 USD)</p>
                 <input type="number" id="input-tasa-cambio" step="0.01" style="font-size:2rem; width:150px; text-align:center;">
                 <button onclick="guardarTasaCambio()" class="btn-exito" style="width:100%; margin-top:20px;">ACTUALIZAR</button>
@@ -200,10 +198,11 @@
     </div>
 </div>
 
+<!-- MODAL CIERRE -->
 <div id="modal-cierre" class="modal">
     <div class="contenido-modal" style="max-width: 450px;">
         <header class="header-modal" style="background:var(--exito);"><h2>CIERRE DIARIO</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
-        <div id="cuerpo-cierre"></div>
+        <div id="cuerpo-cierre" style="padding: 20px;"></div>
         <button onclick="window.print()" class="btn-exito" style="margin:15px; width:90%;">IMPRIMIR</button>
     </div>
 </div>
