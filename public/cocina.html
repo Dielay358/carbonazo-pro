@@ -55,12 +55,18 @@
             } catch(e) { console.error("Error en cocina"); }
         }
 
-        function marcarListo(mesa) {
-            if(confirm("¿Confirmar que la " + mesa + " está lista?")) {
-                // Por ahora solo feedback visual
-                alert("Mesero notificado para " + mesa);
-            }
-        }
+        async function marcarListo(mesa) {
+    const ok = confirm(`¿Marcar pedido de ${mesa} como LISTO?`);
+    if (ok) {
+        await fetch(window.location.origin + '/cocina-listo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mesa: mesa })
+        });
+        alert("Mesero notificado 🚀");
+        cargarPedidos();
+    }
+}
 
         setInterval(cargarPedidos, 5000);
         cargarPedidos();

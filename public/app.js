@@ -454,3 +454,51 @@ async function guardarNuevoProducto() {
 }
 function renderizarAdminProductos() { document.getElementById('cuerpo-tabla-admin').innerHTML = productos.map(p => `<tr><td>${p.icono}</td><td>${p.nombre}</td><td>C$ ${p.precio}</td><td>${p.stock}</td><td><button onclick="borrarProducto(${p.id})" style="color:red; background:none; border:none;"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
 async function borrarProducto(id) { await fetch(`${URL_SERVIDOR}/borrar-producto/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${TOKEN_ACCESO}` } }); await obtenerProductosDB(); renderizarAdminProductos(); }
+
+// --- 1. AUDITORÍA INTELIGENTE ---
+async function filtrarHistorialAuditoria() {
+    const inicio = new Date(document.getElementById('filtro-inicio').value).toLocaleDateString();
+    const fin = new Date(document.getElementById('filtro-fin').value).toLocaleDateString();
+    
+    const res = await fetch(`${URL_SERVIDOR}/lista-ventas-auditoria?inicio=${inicio}&fin=${fin}`);
+    const ventas = await res.json();
+    
+    let suma = 0;
+    document.getElementById('cuerpo-tabla-ventas').innerHTML = ventas.map(v => {
+        suma += parseFloat(v.total);
+        return `<tr><td>#${v.id}</td><td>${v.fecha}</td><td>${v.mesa}</td><td>${v.mesero}</td><td>C$ ${parseFloat(v.total).toFixed(2)}</td><td>...</td></tr>`;
+    }).join('');
+    
+    document.getElementById('total-auditoria').innerText = `TOTAL FILTRADO: C$ ${suma.toFixed(2)}`;
+}
+
+// --- 2. NOTIFICACIÓN DE COCINA ---
+// Dentro de refrescarMesas(), añadimos la alerta
+async function refrescarMesas() {
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
+        const nuevasMesas = await res.json();
+        
+        // Comparar con el estado anterior para ver si hay algún pedido 'Listo' nuevo
+        nuevasMesas.forEach(m => {
+            const antigua = mesasAbiertas.find(ma => ma.mesa === m.mesa);
+            if (m.estado_cocina === 'Listo' && (!antigua || antigua.estado_cocina === 'Pendiente')) {
+                // ALERTA VISUAL Y SONORA
+                alert(`🔔 ¡PEDIDO LISTO EN ${m.mesa}!`);
+                reproducirSonido('exito');
+            }
+        });
+
+        mesasAbiertas = nuevasMesas;
+        dibujarMapaMesas();
+    } catch(e) { console.error("Error sincronización"); }
+}
+
+// --- 3. SISTEMA DE FIDELIZACIÓN (PUNTOS) ---
+async function buscarPuntos() {
+    const tel = document.getElementById('cliente-tel').value;
+    if (!tel) return;
+    const res = await fetch(`${URL_SERVIDOR}/puntos-cliente/${tel}`);
+    const data = await res.json();
+    document.getElementById('cliente-puntos-aviso').innerText = `Puntos acumulados: ${data.puntos} ✨`;
+}

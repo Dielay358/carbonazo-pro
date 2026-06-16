@@ -6,6 +6,7 @@
     <title>POS El Carbonazo Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -103,6 +104,14 @@
             </div>
             </div>
 
+            <div style="background:#eee; padding:10px; border-radius:10px; margin-bottom:15px;">
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="cliente-nombre" placeholder="Cliente" style="flex:2;">
+                    <input type="text" id="cliente-tel" placeholder="Celular" style="flex:1;" onchange="buscarPuntos()">
+                </div>
+                <div id="cliente-puntos-aviso" style="font-size:0.75rem; color:#457b9d; margin-top:5px; font-weight:bold;"></div>
+            </div>
+
             <div id="seccion-pago-simple">
                 <p>Método de Pago:</p>
                 <div style="display:grid; gap:8px;">
@@ -131,8 +140,14 @@
 <!-- MODAL HISTORIAL -->
 <div id="modal-ventas" class="modal">
     <div class="contenido-modal">
-        <header class="header-modal"><h2>HISTORIAL</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
+        <header class="header-modal"><h2>HISTORIAL Y AUDITORÍA</h2><button onclick="cerrarModal()" class="btn-cerrar">&times;</button></header>
+        <!-- FILTRO DE FECHAS -->
+        <div style="background:#eee; padding:10px; display:flex; gap:10px; justify-content:center; align-items:center;">
+            Desde: <input type="date" id="filtro-inicio"> Hasta: <input type="date" id="filtro-fin">
+            <button onclick="filtrarHistorialAuditoria()" class="btn-secundario" style="padding:5px 15px;">FILTRAR</button>
+        </div>
         <div class="tabla-contenedor"><table><thead><tr><th>ID</th><th>Fecha</th><th>Mesa</th><th>Mesero</th><th>Total</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-ventas"></tbody></table></div>
+        <div id="total-auditoria" style="padding:15px; text-align:right; font-weight:bold; font-size:1.2rem; background:#f0f0f0;"></div>
     </div>
 </div>
 
@@ -144,6 +159,7 @@
             <button onclick="cambiarTabAdmin('prods')" class="btn-filtro">Productos</button>
             <button onclick="cambiarTabAdmin('users')" class="btn-filtro">Meseros</button>
             <button onclick="cambiarTabAdmin('config')" class="btn-filtro">Configuración</button>
+            <button onclick="cambiarTabAdmin('stats')" class="btn-filtro">Estadísticas</button>
         </div>
         <div class="tabla-contenedor" style="max-height:450px; overflow-y:auto;">
             <div id="tab-prods" class="admin-tab-content">
@@ -174,6 +190,13 @@
                 <p>Tasa de cambio (NIO x 1 USD)</p>
                 <input type="number" id="input-tasa-cambio" step="0.01" style="font-size:2rem; width:200px; text-align:center;">
                 <button onclick="guardarTasaCambio()" class="btn-exito" style="width:100%; margin-top:20px;">ACTUALIZAR</button>
+            </div>
+            <div id="tab-stats" class="admin-tab-content" style="display:none; padding: 15px;">
+               <h4><i class="fas fa-chart-line"></i> Desempeño de Hoy</h4>
+               <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                   <canvas id="chartProductos" style="max-height: 250px;"></canvas>
+                   <canvas id="chartPagos" style="max-height: 250px;"></canvas>
+                </div>
             </div>
         </div>
     </div>
