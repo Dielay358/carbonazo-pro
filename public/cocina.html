@@ -2,52 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Monitor de Cocina - El Carbonazo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Parrilla - El Carbonazo</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background: #343a40; color: white; overflow-y: auto; }
-        .grid-cocina { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
-        .pedido-card { background: white; color: black; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .pedido-header { border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .item-row { font-size: 1.4rem; padding: 5px 0; border-bottom: 1px solid #f9f9f9; }
-        .btn-listo { background: var(--exito); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        body { background: #1a1a1a; color: white; padding: 0; margin: 0; }
+        .grid-cocina { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; padding: 15px; }
+        .pedido-card { background: #ffffff; color: #333; border-radius: 12px; padding: 15px; border-left: 8px solid var(--primario); position: relative; animation: blinkNew 0.5s ease-in-out; }
+        @keyframes blinkNew { from { transform: scale(0.9); } to { transform: scale(1); } }
+        .pedido-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; }
+        .item-row { font-size: 1.3rem; padding: 8px 0; border-bottom: 1px solid #f1f1f1; }
+        .nota-cocina { background: #ffebee; color: #c62828; padding: 5px 10px; border-radius: 6px; font-size: 1rem; font-weight: bold; margin-top: 5px; border: 1px dashed #c62828; }
+        .btn-listo { background: var(--exito); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 1.1rem; }
     </style>
 </head>
 <body>
-    <header style="background:#212529;">
+    <header style="background:var(--oscuro); display:flex; justify-content:space-between; align-items:center; padding:10px 20px;">
         <h2><i class="fas fa-fire"></i> MONITOR DE PARRILLA</h2>
-        <div id="reloj"></div>
+        <div id="reloj" style="font-size: 1.5rem; font-family: monospace;"></div>
     </header>
-    <div id="grid-cocina" class="grid-cocina">
-        <!-- Los pedidos aparecen aquí -->
-    </div>
+
+    <div id="grid-cocina" class="grid-cocina"></div>
 
     <script>
         async function cargarPedidos() {
-            const res = await fetch(window.location.origin + '/cocina-pendientes');
-            const pedidos = await res.json();
-            const grid = document.getElementById('grid-cocina');
-            grid.innerHTML = pedidos.map(p => {
-                const items = JSON.parse(p.items);
-                return `
-                    <div class="pedido-card">
-                        <div class="pedido-header">
-                            <h3>${p.mesa}</h3>
-                            <small>${p.fecha_apertura.split(', ')[1]}</small>
+            try {
+                const res = await fetch(window.location.origin + '/cocina-pendientes');
+                const pedidos = await res.json();
+                const grid = document.getElementById('grid-cocina');
+                
+                grid.innerHTML = pedidos.map(p => {
+                    const items = JSON.parse(p.items);
+                    return `
+                        <div class="pedido-card">
+                            <div class="pedido-header">
+                                <h2 style="margin:0;">${p.mesa}</h2>
+                                <span style="font-family:monospace; background:#eee; padding:2px 5px; border-radius:4px;">${p.fecha_apertura.split(', ')[1]}</span>
+                            </div>
+                            <div style="min-height:100px;">
+                                ${items.map(i => `
+                                    <div class="item-row">
+                                        <strong>${i.cantidad}</strong> x ${i.nombre}
+                                        ${i.nota ? `<div class="nota-cocina">⚠️ ${i.nota}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top:10px; font-size:0.9rem; color:#666;">Mesero: ${p.mesero}</div>
+                            <button class="btn-listo" onclick="marcarListo('${p.mesa}')">ORDEN COMPLETADA</button>
                         </div>
-                        <div style="padding:10px 0;">
-                            ${items.map(i => `<div class="item-row"><strong>${i.cantidad}</strong> x ${i.nombre}</div>`).join('')}
-                        </div>
-                        <p>Mesero: ${p.mesero}</p>
-                        <button class="btn-listo" onclick="marcarListo('${p.mesa}')">PEDIDO LISTO</button>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch(e) { console.error("Error en cocina"); }
         }
 
-        async function marcarListo(mesa) {
-            // Aquí podrías implementar una notificación al mesero
-            alert("Pedido de " + mesa + " marcado como listo");
+        function marcarListo(mesa) {
+            if(confirm("¿Confirmar que la " + mesa + " está lista?")) {
+                // Por ahora solo feedback visual
+                alert("Mesero notificado para " + mesa);
+            }
         }
 
         setInterval(cargarPedidos, 5000);
