@@ -275,19 +275,6 @@ async function cargarEstadisticas() {
     chartPagos = new Chart(ctxM, { type: 'doughnut', data: { labels: data.metodosPago.map(p => p.metodo), datasets: [{ data: data.metodosPago.map(p => p.monto), backgroundColor: ['#2a9d8f', '#457b9d', '#1d3557'] }] } });
 }
 
-async function procesarPegadoMasivo() {
-    const texto = document.getElementById('texto-pegado').value;
-    const filas = texto.split('\n');
-    for (let f of filas) {
-        const cols = f.split('\t');
-        if (cols.length >= 3) {
-            const d = { categoria: cols[0], nombre: cols[1], precio: parseFloat(cols[2]), icono: '🍽️', stock: 999 };
-            await fetch(`${URL_SERVIDOR}/agregar-producto`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
-        }
-    }
-    alert("Importación finalizada"); cerrarModal(); obtenerProductosDB();
-}
-
 // --- 7. UTILIDADES ---
 
 function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
@@ -394,4 +381,83 @@ async function buscarPuntos() {
     const data = await res.json();
     document.getElementById('cliente-puntos-aviso').innerText = `Puntos acumulados: ${data.puntos || 0} ✨`;
 }
-function abrirPegarMasivo() { document.getElementById('modal-pegar-masivo').style.display='flex'; }
+
+// --- FUNCIÓN PARA ABRIR EL CUADRO DE PEGADO ---
+function abrirPegarMasivo() {
+    reproducirSonido('click');
+    document.getElementById('modal-pegar-masivo').style.display = 'flex';
+    document.getElementById('texto-pegado').value = ''; // Limpiar previo
+    document.getElementById('estado-importacion').innerText = '';
+}
+
+// --- LÓGICA MAESTRA DE PROCESAMIENTO ---
+async function procesarPegadoMasivo() {
+    const texto = document.getElementById('texto-pegado').value;
+    const indicador = document.getElementById('estado-importacion');
+
+    if (!texto.trim()) {
+        alert("⚠️ El cuadro está vacío. Pega tus columnas de Excel primero.");
+        return;
+    }
+
+    // 1. Separamos por filas
+    const filas = texto.split(/\r?\n/);
+    const limiteFilas = Math.min(filas.length, 70); // Máximo 70
+    let exitosos = 0;
+
+    indicador.style.color = "var(--oscuro)";
+    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Procesando ${limiteFilas} filas...`;
+
+    // 2. Procesamos cada fila una por una
+    for (let i = 0; i < limiteFilas; i++) {
+        // Excel separa columnas con el caracter invisible TAB (\t)
+        const columnas = filas[i].split('\t');
+
+        if (columnas.length >= 3) {
+            const categoria = columnas[0].trim();
+            const nombre = columnas[1].trim();
+            // Limpiamos el precio: quitamos "C$", espacios, letras, etc.
+            const precioLimpio = columnas[2].replace(/[^0-9.]/g, '');
+            const precio = parseFloat(precioLimpio);
+
+            if (nombre && !isNaN(precio)) {
+                const nuevoProd = {
+                    nombre: nombre,
+                    precio: precio,
+                    icono: '🍽️', // Icono por defecto, luego puedes editarlos
+                    categoria: categoria || 'General',
+                    stock: 999
+                };
+
+                try {
+                    // Enviamos al servidor
+                    const respuesta = await fetch(`${URL_SERVIDOR}/agregar-producto`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${TOKEN_ACCESO}` 
+                        },
+                        body: JSON.stringify(nuevoProd)
+                    });
+
+                    if (respuesta.ok) exitosos++;
+                } catch (e) {
+                    console.error("Fallo al insertar fila " + (i + 1));
+                }
+            }
+        }
+    }
+
+    // 3. Resultado final
+    indicador.style.color = "var(--exito)";
+    indicador.innerHTML = `✅ ¡Éxito! Se agregaron ${exitosos} productos.`;
+
+    reproducirSonido('exito');
+
+    // 4. Refrescar el sistema después de 2 segundos
+    setTimeout(() => {
+        cerrarModal();
+        obtenerProductosDB();    // Refresca menú principal
+        renderizarAdminProductos(); // Refresca tabla de admin
+    }, 2000);
+}

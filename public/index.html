@@ -146,7 +146,31 @@
 <div id="modal-metodo-pago" class="modal">...</div>
 <div id="modal-ventas" class="modal">...</div>
 <div id="modal-cierre" class="modal">...</div>
-<div id="modal-pegar-masivo" class="modal">...</div>
+<!-- MODAL PARA PEGAR DESDE EXCEL -->
+<div id="modal-pegar-masivo" class="modal">
+    <div class="contenido-modal" style="max-width: 550px;">
+        <header class="header-modal">
+            <h2><i class="fas fa-file-import"></i> Importar desde Excel</h2>
+            <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
+        </header>
+        <div style="padding: 20px;">
+            <p style="font-size: 0.85rem; color: #555; margin-bottom: 10px;">
+                1. Selecciona 3 columnas en Excel (<b>Cat, Nombre, Precio</b>).<br>
+                2. Copia (Ctrl+C) y pega aquí abajo (Ctrl+V). Máximo 70 filas.
+            </p>
+            
+            <textarea id="texto-pegado" rows="10" 
+                style="width:100%; border: 2px solid #ddd; border-radius: 10px; padding: 10px; font-family: monospace; font-size: 0.9rem;" 
+                placeholder="Ejemplo:&#10;Carnes	Churrasco	400&#10;Bebidas	Toña	52"></textarea>
+            
+            <div id="estado-importacion" style="margin-top:10px; font-weight:bold; text-align: center;"></div>
+            
+            <button onclick="procesarPegadoMasivo()" class="btn-exito" style="width:100%; margin-top:15px; height: 50px; font-size: 1.1rem;">
+                <i class="fas fa-check-circle"></i> PROCESAR E IMPORTAR AHORA
+            </button>
+        </div>
+    </div>
+</div>
 <div id="modal-selector-cuentas" class="modal">...</div>
 
 <div id="area-impresion"></div>
