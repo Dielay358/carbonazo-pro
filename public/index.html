@@ -176,8 +176,42 @@
                         <input type="text" id="nuevo-categoria" placeholder="Cat">
                         <input type="number" id="nuevo-stock" placeholder="Stock">
                         <button onclick="guardarNuevoProducto()" class="btn-exito">OK</button>
-                    </div>
-                </div>
+                        <!-- Busca el div id="tab-prods" y reemplaza los botones -->
+<div id="tab-prods" class="admin-tab-content">
+    <div style="background:#e9ecef; padding:15px; border-radius:10px; margin-bottom:15px;">
+        <div class="inputs-inline">
+            <input type="text" id="nuevo-nombre" placeholder="Nombre">
+            <input type="number" id="nuevo-precio" placeholder="C$">
+            <input type="text" id="nuevo-icono" placeholder="Emoji">
+            <input type="text" id="nuevo-categoria" placeholder="Cat">
+            <input type="number" id="nuevo-stock" placeholder="Stock" value="999">
+            <button onclick="guardarNuevoProducto()" class="btn-exito">OK</button>
+            <!-- NUEVO BOTÓN PARA PEGAR MASIVO -->
+            <button onclick="abrirPegarMasivo()" class="btn-secundario" style="background:#457b9d;">
+                <i class="fas fa-paste"></i> PEGAR LISTA
+            </button>
+        </div>
+    </div>
+    <table style="width:100%;"><thead><tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-admin"></tbody></table>
+</div>
+
+<!-- NUEVO MODAL PARA PEGAR DESDE EXCEL (Ponlo antes del cierre del body) -->
+<div id="modal-pegar-masivo" class="modal">
+    <div class="contenido-modal" style="max-width: 500px;">
+        <header class="header-modal">
+            <h2>Importar desde Excel</h2>
+            <button onclick="cerrarModal()" class="btn-cerrar">&times;</button>
+        </header>
+        <div style="padding: 20px;">
+            <p style="font-size: 0.8rem; color: #666;">Copie 3 columnas en Excel (Cat, Nombre, Precio) y péguelas aquí abajo (Máx 70 filas):</p>
+            <textarea id="texto-pegado" rows="10" style="width:100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-family: monospace;" placeholder="Ejemplo:&#10;Carnes	Pollo Asado	250&#10;Bebidas	Toña	52"></textarea>
+            <div id="estado-importacion" style="margin-top:10px; font-weight:bold;"></div>
+            <button onclick="procesarPegadoMasivo()" class="btn-exito" style="width:100%; margin-top:15px;">
+                <i class="fas fa-upload"></i> PROCESAR E IMPORTAR
+            </button>
+        </div>
+    </div>
+</div>
                 <table style="width:100%;"><thead><tr><th>Icono</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead><tbody id="cuerpo-tabla-admin"></tbody></table>
             </div>
             <div id="tab-users" class="admin-tab-content" style="display:none;">

@@ -355,3 +355,59 @@ function imprimirPreCuenta() {
     area.innerHTML = `<div class="ticket-header"><h3>PRE-CUENTA</h3><p>${new Date().toLocaleString()}</p></div><div class="ticket-divisor"></div>${items}<div class="ticket-divisor"></div><div class="ticket-fila"><span>Subtotal:</span><span>C$ ${t.toFixed(2)}</span></div><div class="ticket-fila"><span>Total Sugerido (10%):</span><span>C$ ${(t * 1.1).toFixed(2)}</span></div>`;
     setTimeout(() => window.print(), 300);
 }
+
+// --- LÓGICA DE IMPORTACIÓN MASIVA ---
+
+function abrirPegarMasivo() {
+    document.getElementById('modal-pegar-masivo').style.display = 'flex';
+    document.getElementById('texto-pegado').value = '';
+    document.getElementById('estado-importacion').innerText = '';
+}
+
+async function procesarPegadoMasivo() {
+    const texto = document.getElementById('texto-pegado').value;
+    if (!texto.trim()) return alert("El área está vacía");
+
+    const filas = texto.split('\n');
+    const totalAProcesar = Math.min(filas.length, 70); // Límite de 70 filas
+    let procesados = 0;
+
+    document.getElementById('estado-importacion').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Procesando ${totalAProcesar} productos...`;
+
+    for (let i = 0; i < totalAProcesar; i++) {
+        const columnas = filas[i].split('\t'); // Excel usa pestañas (tabs) entre columnas
+        
+        if (columnas.length >= 3) {
+            const categoria = columnas[0].trim();
+            const nombre = columnas[1].trim();
+            // Limpiamos el precio por si trae "C$", comas o puntos
+            const precio = parseFloat(columnas[2].replace(/[^\d.]/g, ''));
+
+            if (nombre && !isNaN(precio)) {
+                const datos = {
+                    nombre: nombre,
+                    precio: precio,
+                    icono: '🍽️', // Icono por defecto
+                    categoria: categoria || 'General',
+                    stock: 999
+                };
+
+                try {
+                    await fetch(`${URL_SERVIDOR}/agregar-producto`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
+                        body: JSON.stringify(datos)
+                    });
+                    procesados++;
+                } catch (e) { console.error("Error en fila " + i); }
+            }
+        }
+    }
+
+    document.getElementById('estado-importacion').innerHTML = `<span style="color:green">✅ Se agregaron ${procesados} productos con éxito.</span>`;
+    setTimeout(() => {
+        cerrarModal();
+        obtenerProductosDB(); // Refresca el menú principal
+        renderizarAdminProductos(); // Refresca la tabla de admin
+    }, 2000);
+}
