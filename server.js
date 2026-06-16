@@ -160,4 +160,26 @@ app.delete('/usuarios-admin/:id', async (req, res) => {
     res.json({ success: true });
 });
 
+// --- RUTA: IMPORTACIÓN MASIVA (Optimizado para evitar error 502) ---
+app.post('/importar-masivo', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    
+    const { productosLista } = req.body;
+    if (!productosLista || !Array.isArray(productosLista)) return res.status(400).send("Lista no válida");
+
+    try {
+        // Usamos una transacción o múltiples inserts en una sola conexión
+        for (let p of productosLista) {
+            await db.query(
+                "INSERT INTO Productos (nombre, precio, icono, categoria, stock) VALUES ($1, $2, $3, $4, $5)",
+                [p.nombre, p.precio, p.icono, p.categoria, p.stock]
+            );
+        }
+        res.json({ success: true, cantidad: productosLista.length });
+    } catch (e) {
+        console.error("Error en importación masiva:", e.message);
+        res.status(500).send(e.message);
+    }
+});
+
 app.listen(PORT, () => console.log(`🚀 Servidor en puerto ${PORT}`));

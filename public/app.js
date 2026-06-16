@@ -294,12 +294,20 @@ async function refrescarMesas() {
     mesasAbiertas = await res.json(); dibujarMapaMesas();
 }
 
+// --- CORRECCIÓN DEL ERROR "NULL" AL INICIO ---
 async function cargarUsuariosLista() {
-    const res = await fetch(`${URL_SERVIDOR}/usuarios`);
-    const u = await res.json();
-    const ops = u.map(x => `<option value="${x.nombre}">${x.nombre}</option>`).join('');
-    document.getElementById('select-mesero').innerHTML = ops;
-    document.getElementById('login-usuario').innerHTML = ops;
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/usuarios`);
+        const u = await res.json();
+        const ops = u.map(x => `<option value="${x.nombre}">${x.nombre}</option>`).join('');
+        
+        // Verificamos si los elementos existen antes de llenarlos
+        const selMesero = document.getElementById('select-mesero');
+        const selLogin = document.getElementById('login-usuario');
+        
+        if (selMesero) selMesero.innerHTML = ops;
+        if (selLogin) selLogin.innerHTML = ops;
+    } catch (e) { console.error("Error al cargar lista de usuarios"); }
 }
 
 function generarTicketPro(d) {
@@ -382,82 +390,62 @@ async function buscarPuntos() {
     document.getElementById('cliente-puntos-aviso').innerText = `Puntos acumulados: ${data.puntos || 0} ✨`;
 }
 
-// --- FUNCIÓN PARA ABRIR EL CUADRO DE PEGADO ---
-function abrirPegarMasivo() {
-    reproducirSonido('click');
-    document.getElementById('modal-pegar-masivo').style.display = 'flex';
-    document.getElementById('texto-pegado').value = ''; // Limpiar previo
-    document.getElementById('estado-importacion').innerText = '';
-}
-
-// --- LÓGICA MAESTRA DE PROCESAMIENTO ---
+// --- LÓGICA DE IMPORTACIÓN MASIVA OPTIMIZADA ---
 async function procesarPegadoMasivo() {
     const texto = document.getElementById('texto-pegado').value;
     const indicador = document.getElementById('estado-importacion');
 
-    if (!texto.trim()) {
-        alert("⚠️ El cuadro está vacío. Pega tus columnas de Excel primero.");
-        return;
-    }
+    if (!texto.trim()) return alert("⚠️ El cuadro está vacío.");
 
-    // 1. Separamos por filas
     const filas = texto.split(/\r?\n/);
-    const limiteFilas = Math.min(filas.length, 70); // Máximo 70
-    let exitosos = 0;
+    const limiteFilas = Math.min(filas.length, 70);
+    const listaAEnviar = [];
 
-    indicador.style.color = "var(--oscuro)";
-    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Procesando ${limiteFilas} filas...`;
+    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Preparando datos...`;
 
-    // 2. Procesamos cada fila una por una
     for (let i = 0; i < limiteFilas; i++) {
-        // Excel separa columnas con el caracter invisible TAB (\t)
         const columnas = filas[i].split('\t');
-
         if (columnas.length >= 3) {
-            const categoria = columnas[0].trim();
-            const nombre = columnas[1].trim();
-            // Limpiamos el precio: quitamos "C$", espacios, letras, etc.
             const precioLimpio = columnas[2].replace(/[^0-9.]/g, '');
             const precio = parseFloat(precioLimpio);
-
-            if (nombre && !isNaN(precio)) {
-                const nuevoProd = {
-                    nombre: nombre,
+            if (columnas[1].trim() && !isNaN(precio)) {
+                listaAEnviar.push({
+                    categoria: columnas[0].trim() || 'General',
+                    nombre: columnas[1].trim(),
                     precio: precio,
-                    icono: '🍽️', // Icono por defecto, luego puedes editarlos
-                    categoria: categoria || 'General',
+                    icono: '🍽️',
                     stock: 999
-                };
-
-                try {
-                    // Enviamos al servidor
-                    const respuesta = await fetch(`${URL_SERVIDOR}/agregar-producto`, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${TOKEN_ACCESO}` 
-                        },
-                        body: JSON.stringify(nuevoProd)
-                    });
-
-                    if (respuesta.ok) exitosos++;
-                } catch (e) {
-                    console.error("Fallo al insertar fila " + (i + 1));
-                }
+                });
             }
         }
     }
 
-    // 3. Resultado final
-    indicador.style.color = "var(--exito)";
-    indicador.innerHTML = `✅ ¡Éxito! Se agregaron ${exitosos} productos.`;
+    if (listaAEnviar.length === 0) return alert("No se encontraron datos válidos.");
 
-    reproducirSonido('exito');
+    try {
+        // UNA SOLA PETICIÓN AL SERVIDOR
+        const respuesta = await fetch(`${URL_SERVIDOR}/importar-masivo`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${TOKEN_ACCESO}` 
+            },
+            body: JSON.stringify({ productosLista: listaAEnviar })
+        });
 
-    // 4. Refrescar el sistema después de 2 segundos
-    setTimeout(() => {
-        cerrarModal();
-        obtenerProductosDB();    // Refresca menú principal
-        renderizarAdminProductos(); // Refresca tabla de admin
-    }, 2000);
+        if (respuesta.ok) {
+            indicador.style.color = "green";
+            indicador.innerHTML = `✅ ¡Éxito! Se subieron ${listaAEnviar.length} productos.`;
+            reproducirSonido('exito');
+            setTimeout(() => {
+                cerrarModal();
+                obtenerProductosDB(); // Refrescar el menú
+            }, 2000);
+        } else {
+            throw new Error("Error en el servidor");
+        }
+    } catch (e) {
+        indicador.style.color = "red";
+        indicador.innerHTML = "❌ Error al subir. Intente con menos filas.";
+    }
 }
