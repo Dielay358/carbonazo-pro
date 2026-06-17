@@ -26,34 +26,31 @@
 
     <script>
         async function cargarPedidos() {
-            try {
-                const res = await fetch(window.location.origin + '/cocina-pendientes');
-                const pedidos = await res.json();
-                const grid = document.getElementById('grid-cocina');
-                
-                grid.innerHTML = pedidos.map(p => {
-                    const items = JSON.parse(p.items);
-                    return `
-                        <div class="pedido-card">
-                            <div class="pedido-header">
-                                <h2 style="margin:0;">${p.mesa}</h2>
-                                <span style="font-family:monospace; background:#eee; padding:2px 5px; border-radius:4px;">${p.fecha_apertura.split(', ')[1]}</span>
-                            </div>
-                            <div style="min-height:100px;">
-                                ${items.map(i => `
-                                    <div class="item-row">
-                                        <strong>${i.cantidad}</strong> x ${i.nombre}
-                                        ${i.nota ? `<div class="nota-cocina">⚠️ ${i.nota}</div>` : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div style="margin-top:10px; font-size:0.9rem; color:#666;">Mesero: ${p.mesero}</div>
-                            <button class="btn-listo" onclick="marcarListo('${p.mesa}')">ORDEN COMPLETADA</button>
-                        </div>
-                    `;
-                }).join('');
-            } catch(e) { console.error("Error en cocina"); }
-        }
+    try {
+        // Llamada a la ruta que acabamos de crear en server.js
+        const res = await fetch(window.location.origin + '/cocina-pendientes');
+        if (!res.ok) throw new Error("Error en servidor");
+        const pedidos = await res.json();
+        const grid = document.getElementById('grid-cocina');
+        
+        grid.innerHTML = pedidos.map(p => {
+            const items = JSON.parse(p.items);
+            return `
+                <div class="pedido-card">
+                    <div class="pedido-header">
+                        <h2>${p.mesa}</h2>
+                        <span style="font-family:monospace;">${p.fecha_apertura.split(', ')[1]}</span>
+                    </div>
+                    <div>
+                        ${items.map(i => `<div class="item-row"><strong>${i.cantidad}</strong> x ${i.nombre}</div>`).join('')}
+                    </div>
+                    <p>Mesero: ${p.mesero}</p>
+                    <button class="btn-listo" onclick="marcarListo('${p.mesa}')">ORDEN COMPLETADA</button>
+                </div>
+            `;
+        }).join('');
+    } catch(e) { console.error("Monitor de cocina en espera de pedidos..."); }
+}
 
         async function marcarListo(mesa) {
     const ok = confirm(`¿Marcar pedido de ${mesa} como LISTO?`);

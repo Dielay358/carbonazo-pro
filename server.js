@@ -6,7 +6,6 @@ const cors = require('cors');
 const sanitizeHtml = require('sanitize-html');
 const path = require('path');
 
-// --- MOTOR LIVE ---
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, { cors: { origin: "*" } });
@@ -39,7 +38,7 @@ if (usesCloud) {
     };
 }
 
-// 🌐 GESTIÓN DE CONEXIONES LIVE
+// 🌐 GESTIÓN LIVE
 io.on('connection', (socket) => {
     socket.on('notificar_cambio', () => { io.emit('actualizar_pantallas'); });
 });
@@ -54,7 +53,12 @@ const initDB = async () => {
         await db.query(`CREATE TABLE IF NOT EXISTS configuracion (llave TEXT PRIMARY KEY, valor TEXT)`);
         await db.query(`CREATE TABLE IF NOT EXISTS clientes (id ${idType}, nombre TEXT, telefono TEXT UNIQUE, puntos INTEGER DEFAULT 0)`);
         
-        // Crear Admin si no existe
+        // Auto-Parche de columnas para la nube
+        if (usesCloud) {
+            try { await db.query(`ALTER TABLE productos ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 999`); } catch(e){}
+            try { await db.query(`ALTER TABLE mesas_abiertas ADD COLUMN IF NOT EXISTS estado_cocina TEXT DEFAULT 'Pendiente'`); } catch(e){}
+        }
+
         const userCheck = await db.query("SELECT COUNT(*) as count FROM usuarios");
         if (parseInt(userCheck.rows[0].count) === 0) {
             await db.query("INSERT INTO usuarios (nombre, pin) VALUES ($1, $2)", ["Admin", "3589"]);
@@ -79,6 +83,7 @@ app.get('/productos', async (req, res) => {
 });
 
 app.post('/importar-masivo', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const { productosLista } = req.body;
     try {
         for (let p of productosLista) {
@@ -87,6 +92,13 @@ app.post('/importar-masivo', async (req, res) => {
         io.emit('actualizar_pantallas');
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/actualizar-producto/:id', async (req, res) => {
+    const { nombre, precio, icono, categoria, stock } = req.body;
+    await db.query("UPDATE productos SET nombre=$1, precio=$2, icono=$3, categoria=$4, stock=$5 WHERE id=$6", [nombre, precio, icono, categoria, stock, req.params.id]);
+    io.emit('actualizar_pantallas');
+    res.json({ success: true });
 });
 
 app.get('/mesas-abiertas', async (req, res) => {
@@ -104,6 +116,12 @@ app.post('/guardar-mesa', async (req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
+app.delete('/limpiar-mesa/:mesa', async (req, res) => {
+    await db.query("DELETE FROM mesas_abiertas WHERE mesa = $1", [req.params.mesa]);
+    io.emit('actualizar_pantallas');
+    res.json({ success: true });
+});
+
 app.post('/nueva-venta', async (req, res) => {
     if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     const { total, propina, descuento, mesero, tipo_pedido, mesa, cliente, tel, metodo_pago, items, p_efectivo, p_tarjeta, p_transf } = req.body;
@@ -111,6 +129,7 @@ app.post('/nueva-venta', async (req, res) => {
         const q = `INSERT INTO ventas (fecha, total, propina, descuento, mesero, tipo_pedido, mesa, cliente, metodo_pago, pago_efectivo, pago_tarjeta, pago_transferencia, items) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
         await db.query(q, [new Date().toLocaleString(), total, propina, descuento, mesero, tipo_pedido, mesa, cliente, metodo_pago, p_efectivo, p_tarjeta, p_transf, JSON.stringify(items)]);
         if (items) for (let i of items) { await db.query("UPDATE productos SET stock = stock - $1 WHERE id = $2", [i.cantidad, i.id]); }
+        if (tel) await db.query(`INSERT INTO clientes (nombre, telefono, puntos) VALUES ($1, $2, $3) ON CONFLICT (telefono) DO UPDATE SET puntos = clientes.puntos + $3`, [cliente, tel, Math.floor(total/100)]);
         io.emit('actualizar_pantallas');
         res.json({ success: true });
     } catch (e) { res.status(500).json({error: e.message}); }
@@ -121,6 +140,13 @@ app.get('/reporte-cierre', async (req, res) => {
     const q = `SELECT SUM(pago_efectivo) as efectivo, SUM(pago_tarjeta) as tarjeta, SUM(pago_transferencia) as transferencia, SUM(total) as gran_total, SUM(propina) as gran_propina FROM ventas WHERE fecha LIKE $1`;
     const result = await db.query(q, [hoy]);
     res.json(result.rows[0]);
+});
+
+app.get('/dashboard-stats', async (req, res) => {
+    const hoy = `%${new Date().toLocaleDateString()}%`;
+    const qPagos = `SELECT metodo_pago as metodo, SUM(total) as monto FROM ventas WHERE fecha LIKE $1 GROUP BY metodo_pago`;
+    const resPagos = await db.query(qPagos, [hoy]);
+    res.json({ metodosPago: resPagos.rows });
 });
 
 app.get('/tasa-cambio', async (req, res) => {
@@ -139,15 +165,30 @@ app.get('/usuarios', async (req, res) => {
     res.json(result.rows);
 });
 
+app.post('/usuarios-admin', async (req, res) => {
+    await db.query("INSERT INTO usuarios (nombre, pin) VALUES ($1, $2)", [req.body.nombre, req.body.pin]);
+    res.json({ success: true });
+});
+
+app.delete('/usuarios-admin/:id', async (req, res) => {
+    await db.query("DELETE FROM usuarios WHERE id = $1", [req.params.id]);
+    res.json({ success: true });
+});
+
 app.get('/lista-ventas', async (req, res) => {
     const result = await db.query("SELECT * FROM ventas ORDER BY id DESC LIMIT 50");
     res.json(result.rows);
 });
 
-app.delete('/limpiar-mesa/:mesa', async (req, res) => {
-    await db.query("DELETE FROM mesas_abiertas WHERE mesa = $1", [req.params.mesa]);
+app.delete('/borrar-venta/:id', async (req, res) => {
+    await db.query("DELETE FROM ventas WHERE id = $1", [req.params.id]);
     io.emit('actualizar_pantallas');
     res.json({ success: true });
+});
+
+app.get('/cocina-pendientes', async (req, res) => {
+    const result = await db.query("SELECT * FROM mesas_abiertas ORDER BY id ASC");
+    res.json(result.rows);
 });
 
 app.post('/cocina-listo', async (req, res) => {
@@ -156,4 +197,16 @@ app.post('/cocina-listo', async (req, res) => {
     res.json({ success: true });
 });
 
-http.listen(PORT, () => console.log(`🚀 Carbonazo Live v11 en puerto ${PORT}`));
+app.get('/puntos-cliente/:tel', async (req, res) => {
+    const result = await db.query("SELECT puntos FROM clientes WHERE telefono = $1", [req.params.tel]);
+    res.json(result.rows[0] || { puntos: 0 });
+});
+
+app.get('/exportar-excel', async (req, res) => {
+    const result = await db.query("SELECT * FROM ventas");
+    let csv = "ID,Fecha,Total,Mesero,Mesa,Metodo\n";
+    result.rows.forEach(v => { csv += `${v.id},"${v.fecha}",${v.total},"${v.mesero}","${v.mesa}","${v.metodo_pago}"\n`; });
+    res.setHeader('Content-Type', 'text/csv').send(csv);
+});
+
+http.listen(PORT, () => console.log(`🚀 Carbonazo Pro LIVE v12 en puerto ${PORT}`));
