@@ -428,27 +428,88 @@ function abrirPegarMasivo() {
     }
 }
 
+// --- REESCRIBIR FUNCIÓN PROCESAR PEGADO ---
 async function procesarPegadoMasivo() {
     const area = document.getElementById('texto-pegado');
-    const texto = area ? area.value : "";
+    const indicador = document.getElementById('estado-importacion');
+    const texto = area ? area.value.trim() : "";
+
+    if (!texto) {
+        alert("⚠️ El cuadro está vacío. Pega tus columnas de Excel.");
+        return;
+    }
+
+    // 1. Convertir texto a lista de objetos
     const filas = texto.split(/\r?\n/);
-    const lista = [];
+    const listaParaEnviar = [];
+
+    indicador.style.color = "blue";
+    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analizando datos...`;
+
     for (let f of filas) {
-        const cols = f.split('\t');
-        if (cols.length >= 3) {
-            lista.push({ categoria: cols[0].trim(), nombre: cols[1].trim(), precio: parseFloat(cols[2].replace(/[^0-9.]/g, '')), icono: '🍽️', stock: 999 });
+        // Detectar si el separador es TAB (Excel) o espacios múltiples
+        const columnas = f.split(/\t/); 
+        
+        if (columnas.length >= 3) {
+            const cat = columnas[0].trim();
+            const nom = columnas[1].trim();
+            // Limpiar precio de símbolos C$, comas o puntos extra
+            const precioLimpio = columnas[2].replace(/[^0-9.]/g, '');
+            const precio = parseFloat(precioLimpio);
+
+            if (nom && !isNaN(precio)) {
+                listaParaEnviar.push({
+                    categoria: cat || 'General',
+                    nombre: nom,
+                    precio: precio,
+                    icono: '🍴',
+                    stock: 999
+                });
+            }
         }
     }
-    if (lista.length === 0) return alert("No hay datos");
-    
-    await fetch(`${URL_SERVIDOR}/importar-masivo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
-        body: JSON.stringify({ productosLista: lista })
-    });
-    alert("Importación exitosa 🥂");
-    cerrarModal();
-    obtenerProductosDB();
+
+    if (listaParaEnviar.length === 0) {
+        indicador.style.color = "red";
+        indicador.innerHTML = "❌ Formato incorrecto. Use 3 columnas: Cat, Nombre, Precio.";
+        return;
+    }
+
+    // 2. Enviar al servidor
+    try {
+        indicador.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Subiendo ${listaParaEnviar.length} productos...`;
+        
+        const respuesta = await fetch(`${URL_SERVIDOR}/importar-masivo`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${TOKEN_ACCESO}` 
+            },
+            body: JSON.stringify({ productosLista: listaParaEnviar })
+        });
+
+        if (respuesta.ok) {
+            const final = await respuesta.json();
+            reproducirSonido('exito');
+            indicador.style.color = "green";
+            indicador.innerHTML = `✅ ¡Éxito! ${listaParaEnviar.length} productos agregados.`;
+            
+            // Limpiar y refrescar
+            setTimeout(async () => {
+                cerrarModal();
+                await obtenerProductosDB(); // Actualiza el menú visual
+                if (typeof renderizarAdminProductos === 'function') renderizarAdminProductos();
+            }, 1500);
+        } else {
+            const errData = await respuesta.json();
+            throw new Error(errData.error || "Error en el servidor");
+        }
+    } catch (e) {
+        console.error(e);
+        indicador.style.color = "red";
+        indicador.innerHTML = `❌ Error: ${e.message}`;
+        alert("Hubo un problema al guardar en la base de datos. Revisa la consola.");
+    }
 }
 
 // --- 8. REPORTES Y HISTORIAL ---
