@@ -353,11 +353,45 @@ function limpiarPantallaPostAccion() {
 }
 
 async function obtenerProductosDB() {
-    const res = await fetch(`${URL_SERVIDOR}/productos`);
-    productos = await res.json();
-    cargarMenu(productos);
-    const cats = ['Todos', ...new Set(productos.map(p => (p.categoria || 'General').trim()))];
-    document.getElementById('barra-categorias').innerHTML = cats.sort().map(c => `<button class="btn-filtro" onclick="filtrarPorCategoria('${c}')">${c}</button>`).join('');
+    try {
+        const res = await fetch(`${URL_SERVIDOR}/productos`);
+        productos = await res.json();
+        
+        cargarMenu(productos);
+        generarFiltrosCategorias(); // Llamada crítica
+    } catch(e) { console.error("Error productos"); }
+}
+
+function generarFiltrosCategorias() {
+    const barra = document.getElementById('barra-categorias');
+    if (!barra) return;
+
+    // Extraer y limpiar
+    const catsRaw = productos.map(p => (p.categoria || 'General').trim());
+    const catsUnicas = ['Todos', ...new Set(catsRaw)].sort();
+
+    barra.innerHTML = catsUnicas.map(cat => `
+        <button class="btn-filtro ${cat === 'Todos' ? 'activo' : ''}" 
+                onclick="cambiarFiltro(this, '${cat}')">
+            ${cat}
+        </button>
+    `).join('');
+}
+
+function cambiarFiltro(elemento, cat) {
+    reproducirSonido('click');
+    
+    // UI: Cambiar botón activo
+    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+    elemento.classList.add('activo');
+
+    // Filtrar
+    if (cat === 'Todos') {
+        cargarMenu(productos);
+    } else {
+        const filtrados = productos.filter(p => (p.categoria || 'General').trim() === cat);
+        cargarMenu(filtrados);
+    }
 }
 
 async function cargarTasaCambio() {
