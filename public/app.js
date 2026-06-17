@@ -434,50 +434,54 @@ async function procesarPegadoMasivo() {
     const indicador = document.getElementById('estado-importacion');
     const texto = area ? area.value.trim() : "";
 
-    if (!texto) {
-        alert("⚠️ El cuadro está vacío. Pega tus columnas de Excel.");
-        return;
-    }
+    if (!texto) return alert("⚠️ El cuadro está vacío.");
 
-    // 1. Convertir texto a lista de objetos
+    // 1. Separar por filas
     const filas = texto.split(/\r?\n/);
-    const listaParaEnviar = [];
+    const listaLimpia = [];
 
     indicador.style.color = "blue";
     indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analizando datos...`;
 
-    for (let f of filas) {
-        // Detectar si el separador es TAB (Excel) o espacios múltiples
-        const columnas = f.split(/\t/); 
+    filas.forEach((f, index) => {
+        // Expresión regular para detectar separadores (Tabuladores o más de 2 espacios)
+        let columnas = f.split(/\t/); 
         
+        // Si no se separó por Tabs, intentamos por múltiples espacios (común al copiar de PDF o Web)
+        if (columnas.length < 3) {
+            columnas = f.split(/  +/); 
+        }
+
         if (columnas.length >= 3) {
             const cat = columnas[0].trim();
             const nom = columnas[1].trim();
-            // Limpiar precio de símbolos C$, comas o puntos extra
-            const precioLimpio = columnas[2].replace(/[^0-9.]/g, '');
-            const precio = parseFloat(precioLimpio);
+            
+            // LIMPIEZA CRÍTICA DE PRECIO:
+            // Quitamos "C$", comas, y cualquier letra. Solo dejamos números y el punto decimal.
+            let precioTexto = columnas[2].replace(/[C$| ]/g, '').replace(/,/g, '');
+            const precio = parseFloat(precioTexto);
 
             if (nom && !isNaN(precio)) {
-                listaParaEnviar.push({
+                listaLimpia.push({
                     categoria: cat || 'General',
                     nombre: nom,
                     precio: precio,
-                    icono: '🍴',
+                    icono: '🍽️',
                     stock: 999
                 });
             }
         }
-    }
+    });
 
-    if (listaParaEnviar.length === 0) {
+    if (listaLimpia.length === 0) {
         indicador.style.color = "red";
-        indicador.innerHTML = "❌ Formato incorrecto. Use 3 columnas: Cat, Nombre, Precio.";
+        indicador.innerHTML = "❌ Formato incorrecto. Use: Categoría | Nombre | Precio";
         return;
     }
 
-    // 2. Enviar al servidor
+    // 2. Enviar todo en un solo bloque
     try {
-        indicador.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Subiendo ${listaParaEnviar.length} productos...`;
+        indicador.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Subiendo ${listaLimpia.length} platos a la nube...`;
         
         const respuesta = await fetch(`${URL_SERVIDOR}/importar-masivo`, {
             method: 'POST',
@@ -485,30 +489,28 @@ async function procesarPegadoMasivo() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${TOKEN_ACCESO}` 
             },
-            body: JSON.stringify({ productosLista: listaParaEnviar })
+            body: JSON.stringify({ productosLista: listaLimpia })
         });
 
-        if (respuesta.ok) {
-            const final = await respuesta.json();
+        const resultado = await respuesta.json(); // Ahora el servidor siempre responde JSON
+
+        if (respuesta.ok && resultado.success) {
             reproducirSonido('exito');
             indicador.style.color = "green";
-            indicador.innerHTML = `✅ ¡Éxito! ${listaParaEnviar.length} productos agregados.`;
+            indicador.innerHTML = `✅ ¡Éxito! ${listaLimpia.length} productos agregados correctamente.`;
             
-            // Limpiar y refrescar
-            setTimeout(async () => {
+            setTimeout(() => {
                 cerrarModal();
-                await obtenerProductosDB(); // Actualiza el menú visual
-                if (typeof renderizarAdminProductos === 'function') renderizarAdminProductos();
-            }, 1500);
+                obtenerProductosDB(); // Refrescar menú visual
+            }, 2000);
         } else {
-            const errData = await respuesta.json();
-            throw new Error(errData.error || "Error en el servidor");
+            throw new Error(resultado.error || "Error desconocido en el servidor");
         }
     } catch (e) {
-        console.error(e);
+        console.error("Error completo:", e);
         indicador.style.color = "red";
         indicador.innerHTML = `❌ Error: ${e.message}`;
-        alert("Hubo un problema al guardar en la base de datos. Revisa la consola.");
+        alert("El servidor rechazó los datos. Asegúrate de que los precios sean números.");
     }
 }
 
