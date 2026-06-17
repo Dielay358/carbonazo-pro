@@ -1,6 +1,6 @@
 /**
  * PROYECTO: ASADO EL CARBONAZO PRO
- * DNA: Motor del Servidor v7.8 - VERSIÓN FINAL ESTABLE
+ * DNA: Motor del Servidor v8.0 - VERSIÓN FINAL ESTABLE Y SINCRONIZADA
  */
 
 require('dotenv').config();
@@ -15,12 +15,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const TOKEN_ACCESO = process.env.TOKEN_ACCESO || "carbonazo2024pro";
 
-// --- CONFIGURACIÓN DE SEGURIDAD Y LÍMITES ---
+// --- 1. CONFIGURACIÓN DE SEGURIDAD Y LÍMITES ---
 app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' })); // Crucial para la importación masiva de Excel
+app.use(bodyParser.json({ limit: '50mb' })); // Para soportar el pegado de muchos platos de Excel
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- CONEXIÓN HÍBRIDA (NUBE / LOCAL) ---
+// --- 2. CONEXIÓN HÍBRIDA (NUBE / LOCAL) ---
 let db;
 const usesCloud = process.env.DATABASE_URL;
 
@@ -30,11 +30,11 @@ if (usesCloud) {
 } else {
     const sqlite3 = require('sqlite3').verbose(); 
     const localDB = new sqlite3.Database('./carbonazo.db');
-    // Puente de compatibilidad para que SQLite entienda la sintaxis $1, $2 de Postgres
+    // Puente de compatibilidad para usar la misma sintaxis en SQLite y Postgres ($1, $2...)
     db = {
         query: (text, params = []) => new Promise((resolve, reject) => {
             const sql = text.replace(/\$\d+/g, '?'); 
-            if (text.trim().startsWith("SELECT")) {
+            if (text.trim().toUpperCase().startsWith("SELECT")) {
                 localDB.all(sql, params, (err, rows) => { if (err) reject(err); else resolve({ rows }); });
             } else {
                 localDB.run(sql, params, function(err) { if (err) reject(err); else resolve({ rows: [], lastID: this.lastID }); });
@@ -44,51 +44,62 @@ if (usesCloud) {
     console.log("🏠 MODO LOCAL: Conectado a SQLite");
 }
 
-// --- INICIALIZACIÓN DE TABLAS (ESTRUCTURA COMPLETA) ---
+// --- 3. INICIALIZACIÓN Y AUTO-PARCHE DE TABLAS ---
 const initDB = async () => {
     const idType = usesCloud ? "SERIAL PRIMARY KEY" : "INTEGER PRIMARY KEY AUTOINCREMENT";
     try {
-        // 1. Ventas (Con todos los campos de pago y propina)
+        // Ventas Completo
         await db.query(`CREATE TABLE IF NOT EXISTS Ventas (
             id ${idType}, fecha TEXT, total REAL, propina REAL, descuento REAL, 
             mesero TEXT, tipo_pedido TEXT, mesa TEXT, cliente TEXT, metodo_pago TEXT, 
             pago_efectivo REAL, pago_tarjeta REAL, pago_transferencia REAL, items TEXT
         )`);
 
-        // 2. Productos
+        // Productos
         await db.query(`CREATE TABLE IF NOT EXISTS Productos (
             id ${idType}, nombre TEXT, precio REAL, icono TEXT, categoria TEXT, stock INTEGER DEFAULT 999
         )`);
 
-        // 3. Usuarios
+        // Usuarios
         await db.query(`CREATE TABLE IF NOT EXISTS Usuarios (
             id ${idType}, nombre TEXT UNIQUE, pin TEXT
         )`);
 
-        // 4. Mesas Abiertas (Sub-cuentas y Monitor de Cocina)
+        // Mesas Abiertas
         await db.query(`CREATE TABLE IF NOT EXISTS Mesas_Abiertas (
             id ${idType}, mesa TEXT UNIQUE, items TEXT, mesero TEXT, 
             total_actual REAL, fecha_apertura TEXT, estado_cocina TEXT DEFAULT 'Pendiente'
         )`);
 
-        // 5. Configuración (Tasa de Cambio)
+        // Configuración y Clientes
         await db.query(`CREATE TABLE IF NOT EXISTS Configuracion (llave TEXT PRIMARY KEY, valor TEXT)`);
-
-        // 6. Clientes (Fidelidad)
         await db.query(`CREATE TABLE IF NOT EXISTS Clientes (id ${idType}, nombre TEXT, telefono TEXT UNIQUE, puntos INTEGER DEFAULT 0)`);
 
-        // Usuario Admin por defecto
+        // 🔥 PARCHE DE COLUMNAS (Por si acaso faltan en la nube)
+        const checkColumns = async () => {
+            if (usesCloud) {
+                try { await db.query(`ALTER TABLE Productos ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 999`); } catch(e){}
+                try { await db.query(`ALTER TABLE Mesas_Abiertas ADD COLUMN IF NOT EXISTS estado_cocina TEXT DEFAULT 'Pendiente'`); } catch(e){}
+                try { await db.query(`ALTER TABLE Ventas ADD COLUMN IF NOT EXISTS pago_efectivo REAL DEFAULT 0`); } catch(e){}
+                try { await db.query(`ALTER TABLE Ventas ADD COLUMN IF NOT EXISTS pago_tarjeta REAL DEFAULT 0`); } catch(e){}
+                try { await db.query(`ALTER TABLE Ventas ADD COLUMN IF NOT EXISTS pago_transferencia REAL DEFAULT 0`); } catch(e){}
+            }
+        };
+        await checkColumns();
+
+        // Crear Admin inicial si no existe
         const userCheck = await db.query("SELECT COUNT(*) as count FROM Usuarios");
         if (parseInt(userCheck.rows[0].count) === 0) {
             await db.query("INSERT INTO Usuarios (nombre, pin) VALUES ($1, $2)", ["Admin", "3589"]);
         }
 
-        console.log("✅ Tablas sincronizadas al 100%.");
-    } catch (err) { console.error("❌ Error inicializando base de datos:", err.message); }
+        console.log("✅ Base de Datos sincronizada y protegida.");
+    } catch (err) { console.error("❌ Error inicializando DB:", err.message); }
 };
 initDB();
 
-// --- RUTAS DE SEGURIDAD (LOGIN) ---
+// --- 4. RUTAS DE SEGURIDAD ---
+
 app.post('/login', async (req, res) => {
     const { nombre, pin } = req.body;
     try {
@@ -98,12 +109,29 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-// --- RUTAS DE PRODUCTOS ---
+// --- 5. RUTAS DE PRODUCTOS E IMPORTACIÓN ---
+
 app.get('/productos', async (req, res) => {
     try {
         const result = await db.query("SELECT * FROM Productos ORDER BY categoria, nombre");
         res.json(result.rows);
     } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/importar-masivo', async (req, res) => {
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).json({error: "No autorizado"});
+    const { productosLista } = req.body;
+    if (!productosLista || !Array.isArray(productosLista)) return res.status(400).json({error: "Lista inválida"});
+
+    try {
+        for (let p of productosLista) {
+            await db.query(
+                "INSERT INTO Productos (nombre, precio, icono, categoria, stock) VALUES ($1, $2, $3, $4, $5)",
+                [p.nombre, p.precio, p.icono, p.categoria, p.stock]
+            );
+        }
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/agregar-producto', async (req, res) => {
@@ -115,17 +143,6 @@ app.post('/agregar-producto', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-app.post('/importar-masivo', async (req, res) => {
-    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
-    const { productosLista } = req.body;
-    try {
-        for (let p of productosLista) {
-            await db.query("INSERT INTO Productos (nombre, precio, icono, categoria, stock) VALUES ($1, $2, $3, $4, $5)", [p.nombre, p.precio, p.icono, p.categoria, p.stock]);
-        }
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
-});
-
 app.delete('/borrar-producto/:id', async (req, res) => {
     if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
     try {
@@ -134,7 +151,8 @@ app.delete('/borrar-producto/:id', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-// --- RUTAS DE MESAS Y COCINA ---
+// --- 6. RUTAS DE MESAS Y COCINA ---
+
 app.get('/mesas-abiertas', async (req, res) => {
     try {
         const result = await db.query("SELECT * FROM Mesas_Abiertas ORDER BY id ASC");
@@ -172,28 +190,25 @@ app.post('/cocina-listo', async (req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
-// --- RUTAS DE VENTAS Y FINANZAS ---
+// --- 7. RUTAS DE VENTAS Y FINANZAS ---
+
 app.post('/nueva-venta', async (req, res) => {
-    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).send("No autorizado");
+    if (req.headers['authorization'] !== `Bearer ${TOKEN_ACCESO}`) return res.status(401).json({error: "No autorizado"});
     const { total, propina, descuento, mesero, tipo_pedido, mesa, cliente, tel, metodo_pago, items, p_efectivo, p_tarjeta, p_transf } = req.body;
     const fecha = new Date().toLocaleString();
     try {
-        // 1. Guardar Venta detallada
         const q = `INSERT INTO Ventas (fecha, total, propina, descuento, mesero, tipo_pedido, mesa, cliente, metodo_pago, pago_efectivo, pago_tarjeta, pago_transferencia, items) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
         await db.query(q, [fecha, total, propina, descuento, mesero, tipo_pedido, mesa, sanitizeHtml(cliente), metodo_pago, p_efectivo, p_tarjeta, p_transf, JSON.stringify(items)]);
         
-        // 2. Fidelidad: Sumar puntos (C$ 100 = 1 punto)
-        if (tel && tel.trim() !== "") {
-            const puntosNuevos = Math.floor(total / 100);
-            await db.query(`INSERT INTO Clientes (nombre, telefono, puntos) VALUES ($1, $2, $3) ON CONFLICT (telefono) DO UPDATE SET puntos = Clientes.puntos + $3`, [cliente, tel, puntosNuevos]);
+        if (tel) {
+            await db.query(`INSERT INTO Clientes (nombre, telefono, puntos) VALUES ($1, $2, $3) ON CONFLICT (telefono) DO UPDATE SET puntos = Clientes.puntos + $3`, [cliente, tel, Math.floor(total/100)]);
         }
 
-        // 3. Restar Stock
         if (items && Array.isArray(items)) {
-            for (let item of items) { await db.query("UPDATE Productos SET stock = stock - $1 WHERE id = $2", [item.cantidad, item.id]); }
+            for (let i of items) { await db.query("UPDATE Productos SET stock = stock - $1 WHERE id = $2", [i.cantidad, i.id]); }
         }
         res.json({ success: true });
-    } catch (err) { console.error(err); res.status(500).send(err.message); }
+    } catch (err) { console.error(err); res.status(500).json({error: err.message}); }
 });
 
 app.get('/reporte-cierre', async (req, res) => {
@@ -216,7 +231,8 @@ app.get('/dashboard-stats', async (req, res) => {
     } catch (e) { res.status(500).json({ metodosPago: [] }); }
 });
 
-// --- RUTAS DE CONFIGURACIÓN Y USUARIOS ---
+// --- 8. CONFIGURACIÓN Y TASA ---
+
 app.get('/tasa-cambio', async (req, res) => {
     try {
         const result = await db.query("SELECT valor FROM Configuracion WHERE llave = 'tasa_cambio'");
@@ -278,8 +294,17 @@ app.get('/puntos-cliente/:tel', async (req, res) => {
     } catch (e) { res.json({ puntos: 0 }); }
 });
 
+app.get('/exportar-excel', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM Ventas");
+        let csv = "ID,Fecha,Total,Propina,Mesero,Mesa,Metodo\n";
+        result.rows.forEach(v => { csv += `${v.id},"${v.fecha}",${v.total},${v.propina},"${v.mesero}","${v.mesa}","${v.metodo_pago}"\n`; });
+        res.setHeader('Content-Type', 'text/csv').send(csv);
+    } catch (err) { res.status(500).send(err.message); }
+});
+
 app.listen(PORT, () => {
     console.log(`-------------------------------------------------`);
-    console.log(`🚀 SERVIDOR CARBONAZO PRO ACTIVO EN PUERTO ${PORT}`);
+    console.log(`🚀 SERVIDOR CARBONAZO PRO v8.0 ACTIVO EN ${PORT}`);
     console.log(`-------------------------------------------------`);
 });
