@@ -6,6 +6,7 @@
     <title>POS El Carbonazo Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -214,6 +215,13 @@
 <audio id="sonido-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 <audio id="sonido-exito" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
 
-<script src="app.js"></script>
+<!-- 1. LIBRERÍA LIVE (SOCKET.IO) -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- 2. LIBRERÍA DE GRÁFICOS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 3. CEREBRO DE LA APP -->
+    <script src="app.js"></script>
 </body>
 </html>
