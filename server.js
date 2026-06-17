@@ -8,7 +8,7 @@ const path = require('path');
 
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http, { cors: { origin: "*" } });
+const io = require('socket.io')(http);
 
 const PORT = process.env.PORT || 3000;
 const TOKEN_ACCESO = process.env.TOKEN_ACCESO || "carbonazo2024pro";
@@ -172,4 +172,6 @@ app.get('/puntos-cliente/:tel', async (req, res) => {
     res.json(result.rows[0] || { puntos: 0 });
 });
 
-http.listen(PORT, () => console.log(`🚀 Carbonazo LIVE en puerto ${PORT}`));
+http.listen(PORT, () => {
+    console.log(`🚀 Servidor Live en puerto ${PORT}`);
+});
