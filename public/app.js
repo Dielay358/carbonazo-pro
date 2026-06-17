@@ -194,9 +194,19 @@ async function obtenerProductosDB() {
     try {
         const res = await fetch(`${URL_SERVIDOR}/productos`);
         productos = await res.json();
+        
+        // Dibujamos el menú completo al inicio
         cargarMenu(productos);
+        
+        // Generamos los botones de categorías dinámicamente
         generarFiltrosCategorias();
-    } catch(e) { console.error("Error productos"); }
+        
+        // Actualizamos la tabla de administración
+        if (typeof renderizarAdminProductos === 'function') renderizarAdminProductos();
+        
+    } catch (e) {
+        console.error("Error cargando productos:", e);
+    }
 }
 
 function cargarMenu(lista) {
@@ -213,14 +223,36 @@ function cargarMenu(lista) {
 
 function generarFiltrosCategorias() {
     const barra = document.getElementById('barra-categorias');
-    if(!barra) return;
-    const cats = ['Todos', ...new Set(productos.map(p => p.categoria || 'General'))];
-    barra.innerHTML = cats.map(c => `<button class="btn-filtro" onclick="filtrarPorCategoria('${c}')">${c}</button>`).join('');
+    if (!barra) return;
+
+    // Extraemos las categorías de los productos reales en la DB
+    // Usamos .trim() para evitar que "Carnes" y "Carnes " se vean como dos botones
+    const categoriasLimpias = productos.map(p => (p.categoria || 'General').trim());
+    
+    // Obtenemos solo valores únicos
+    const categoriasUnicas = [...new Set(categoriasLimpias)].sort();
+
+    // Creamos los botones. El primero siempre es "Todos"
+    const todasLasCategorias = ['Todos', ...categoriasUnicas];
+
+    barra.innerHTML = todasLasCategorias.map(cat => `
+        <button class="btn-filtro" onclick="filtrarPorCategoria('${cat}')">
+            ${cat}
+        </button>
+    `).join('');
 }
 
 function filtrarPorCategoria(cat) {
     reproducirSonido('click');
-    cargarMenu(cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat));
+    
+    // Si elige "Todos", mostramos la lista completa
+    if (cat === 'Todos') {
+        cargarMenu(productos);
+    } else {
+        // Filtramos comparando el nombre de la categoría (quitando espacios)
+        const filtrados = productos.filter(p => (p.categoria || 'General').trim() === cat);
+        cargarMenu(filtrados);
+    }
 }
 
 function filtrarBusqueda() {
@@ -436,81 +468,42 @@ async function procesarPegadoMasivo() {
 
     if (!texto) return alert("⚠️ El cuadro está vacío.");
 
-    // 1. Separar por filas
     const filas = texto.split(/\r?\n/);
-    const listaLimpia = [];
+    const listaParaEnviar = [];
+    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Procesando...`;
 
-    indicador.style.color = "blue";
-    indicador.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analizando datos...`;
-
-    filas.forEach((f, index) => {
-        // Expresión regular para detectar separadores (Tabuladores o más de 2 espacios)
-        let columnas = f.split(/\t/); 
-        
-        // Si no se separó por Tabs, intentamos por múltiples espacios (común al copiar de PDF o Web)
-        if (columnas.length < 3) {
-            columnas = f.split(/  +/); 
-        }
-
+    for (let f of filas) {
+        const columnas = f.split('\t');
         if (columnas.length >= 3) {
-            const cat = columnas[0].trim();
-            const nom = columnas[1].trim();
-            
-            // LIMPIEZA CRÍTICA DE PRECIO:
-            // Quitamos "C$", comas, y cualquier letra. Solo dejamos números y el punto decimal.
-            let precioTexto = columnas[2].replace(/[C$| ]/g, '').replace(/,/g, '');
-            const precio = parseFloat(precioTexto);
-
-            if (nom && !isNaN(precio)) {
-                listaLimpia.push({
-                    categoria: cat || 'General',
-                    nombre: nom,
-                    precio: precio,
-                    icono: '🍽️',
-                    stock: 999
-                });
-            }
+            listaParaEnviar.push({
+                categoria: columnas[0].trim() || 'General',
+                nombre: columnas[1].trim(),
+                precio: parseFloat(columnas[2].replace(/[^0-9.]/g, '')),
+                icono: '🍽️',
+                stock: 999
+            });
         }
-    });
-
-    if (listaLimpia.length === 0) {
-        indicador.style.color = "red";
-        indicador.innerHTML = "❌ Formato incorrecto. Use: Categoría | Nombre | Precio";
-        return;
     }
 
-    // 2. Enviar todo en un solo bloque
     try {
-        indicador.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Subiendo ${listaLimpia.length} platos a la nube...`;
-        
-        const respuesta = await fetch(`${URL_SERVIDOR}/importar-masivo`, {
+        const res = await fetch(`${URL_SERVIDOR}/importar-masivo`, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TOKEN_ACCESO}` 
-            },
-            body: JSON.stringify({ productosLista: listaLimpia })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_ACCESO}` },
+            body: JSON.stringify({ productosLista: listaParaEnviar })
         });
 
-        const resultado = await respuesta.json(); // Ahora el servidor siempre responde JSON
-
-        if (respuesta.ok && resultado.success) {
+        if (res.ok) {
             reproducirSonido('exito');
-            indicador.style.color = "green";
-            indicador.innerHTML = `✅ ¡Éxito! ${listaLimpia.length} productos agregados correctamente.`;
+            indicador.innerHTML = `<span style="color:green">✅ Se agregaron ${listaParaEnviar.length} productos.</span>`;
             
-            setTimeout(() => {
+            // --- PASO CLAVE: Refrescamos TODO el sistema ---
+            setTimeout(async () => {
                 cerrarModal();
-                obtenerProductosDB(); // Refrescar menú visual
-            }, 2000);
-        } else {
-            throw new Error(resultado.error || "Error desconocido en el servidor");
+                await obtenerProductosDB(); // Esto recargará los productos y los botones de categorías
+            }, 1500);
         }
     } catch (e) {
-        console.error("Error completo:", e);
-        indicador.style.color = "red";
-        indicador.innerHTML = `❌ Error: ${e.message}`;
-        alert("El servidor rechazó los datos. Asegúrate de que los precios sean números.");
+        indicador.innerHTML = "❌ Error al subir.";
     }
 }
 

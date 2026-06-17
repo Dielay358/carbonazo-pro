@@ -1,31 +1,32 @@
 /* =========================================
-   ASADO EL CARBONAZO PRO - DNA VISUAL
+   ASADO EL CARBONAZO PRO - v8.5 MASTER CSS
    ========================================= */
 
 :root {
-    --primario: #e63946;    /* Rojo Carbonazo */
-    --oscuro: #1d3557;      /* Azul profundo */
-    --fondo: #f1faee;       /* Blanco hueso */
-    --exito: #2a9d8f;       /* Verde venta */
+    --primario: #e63946;    /* Rojo Fuego */
+    --oscuro: #1d3557;      /* Marino Profundo */
+    --fondo: #f1faee;       /* Hueso */
+    --exito: #2a9d8f;       /* Verde Venta */
+    --dorado: #ffd166;      /* Oro Puntos/Dinero */
     --gris-claro: #edf2f4;
     --texto: #333;
-    --sombra: 0 4px 6px rgba(0,0,0,0.1);
+    --sombra: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-/* 1. BASE Y ESTRUCTURA */
-* { box-sizing: border-box; }
+/* 1. ESTRUCTURA BASE */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--fondo);
     color: var(--texto);
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* Evita scroll doble */
 }
 
+/* 2. ENCABEZADO */
 header {
     background-color: var(--oscuro);
     color: white;
@@ -33,17 +34,16 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     z-index: 100;
 }
 
-.logo { font-size: 1.4rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+.logo { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; }
 .logo span { color: var(--primario); }
 
-/* 2. SELECTOR DE USUARIO */
 .usuario-selector {
     background: rgba(255,255,255,0.1);
-    padding: 6px 12px;
+    padding: 6px 15px;
     border-radius: 30px;
     display: flex;
     align-items: center;
@@ -60,66 +60,137 @@ header {
     cursor: pointer;
 }
 
-/* 3. MAPA DE MESAS Y TOTALES RÁPIDOS */
+/* 3. MAPA DE MESAS (ACTUALIZADO) */
 .mapa-mesas {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
+    gap: 10px;
+    padding: 15px;
     background: #ced4da;
     justify-content: center;
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    overflow-x: auto;
 }
 
 .mesa-btn {
-    width: 75px;
-    height: 55px;
+    width: 85px;
+    height: 60px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     background-color: white;
     font-weight: bold;
-    font-size: 0.8rem;
     cursor: pointer;
     box-shadow: var(--sombra);
-    transition: 0.2s;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
+    transition: 0.2s;
 }
 
 .mesa-btn.ocupada { background-color: var(--primario); color: white; }
 .mesa-btn.seleccionada { border: 3px solid var(--oscuro); transform: scale(1.05); }
 
-/* Popup de totales rápidos */
+/* Popup Totales Rápidos */
 .mesa-info-flotante {
     visibility: hidden;
     opacity: 0;
     position: absolute;
-    bottom: 115%;
+    bottom: 120%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--oscuro);
+    background: var(--oscuro);
     color: white;
-    padding: 8px 12px;
+    padding: 8px;
     border-radius: 8px;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    z-index: 100;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    font-size: 0.7rem;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+
+.mesa-info-flotante span { color: var(--dorado); font-weight: bold; }
+
+.mesa-btn:hover .mesa-info-flotante { visibility: visible; opacity: 1; }
+
+/* 4. BUSCADOR Y BARRA DE CATEGORÍAS (SCROLLABLE) */
+.seccion-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.buscador {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--sombra);
+}
+
+.buscador input { border: none; outline: none; width: 100%; margin-left: 10px; font-size: 1.1rem; }
+
+/* BARRA DE CATEGORÍAS MEJORADA */
+.filtros-categoria {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    overflow-x: auto; /* Permite deslizar lateralmente */
+    scrollbar-width: none; /* Oculta en Firefox */
+}
+
+.filtros-categoria::-webkit-scrollbar { display: none; } /* Oculta en Chrome/Safari */
+
+.btn-filtro {
+    padding: 10px 22px;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    font-weight: bold;
+    color: var(--oscuro);
+    cursor: pointer;
+    white-space: nowrap; /* Evita que el texto salte de línea */
     transition: 0.3s;
+    box-shadow: var(--sombra);
 }
 
-.mesa-info-flotante span { color: #ffd166; font-weight: bold; }
-
-.mesa-btn:hover .mesa-info-flotante {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(-50%) translateY(-5px);
+.btn-filtro:hover, .btn-filtro:active {
+    background: var(--primario);
+    color: white;
+    border-color: var(--primario);
 }
 
-/* 4. LAYOUT PRINCIPAL */
+/* 5. PRODUCTOS */
+.grid-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.tarjeta-producto {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: 0.2s;
+    border-bottom: 5px solid transparent;
+}
+
+.tarjeta-producto:hover { border-color: var(--primario); transform: translateY(-3px); }
+
+.tarjeta-producto.agotado { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+.low-stock { color: var(--primario); font-weight: bold; animation: blink 1s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* 6. CARRITO */
 .contenedor-principal {
     display: grid;
     grid-template-columns: 1fr 380px;
@@ -129,294 +200,113 @@ header {
     overflow: hidden;
 }
 
-/* 5. MENÚ Y CATEGORÍAS */
-.seccion-menu { display: flex; flex-direction: column; overflow-y: auto; }
-
-.buscador {
-    display: flex;
-    align-items: center;
-    background: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    box-shadow: var(--sombra);
-}
-
-.buscador input { border: none; outline: none; width: 100%; margin-left: 10px; font-size: 1rem; }
-
-.filtros-categoria { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding: 5px 0; }
-
-.btn-filtro {
-    padding: 8px 18px;
-    border-radius: 20px;
-    border: none;
-    background: white;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: var(--sombra);
-    font-weight: 600;
-}
-
-.grid-productos {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-}
-
-.tarjeta-producto {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: var(--sombra);
-    cursor: pointer;
-    transition: 0.2s;
-    border-bottom: 4px solid transparent;
-}
-
-.tarjeta-producto:hover { border-color: var(--primario); transform: translateY(-3px); }
-
-/* 6. CARRITO */
 .seccion-carrito {
     background: white;
-    border-radius: 15px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    box-shadow: -3px 0 15px rgba(0,0,0,0.1);
+    box-shadow: -5px 0 20px rgba(0,0,0,0.1);
     overflow: hidden;
 }
 
-.cabecera-carrito { padding: 15px; background: var(--oscuro); color: white; }
+.cabecera-carrito { padding: 18px; background: var(--oscuro); color: white; text-align: center; }
 
 .lista-items { flex: 1; overflow-y: auto; padding: 15px; }
 
 .item-carrito-lista {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--gris-claro);
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
 }
 
-/* 7. BOTONES ACCIÓN CARRITO */
-.totales { padding: 15px; background: var(--gris-claro); }
+/* 7. BOTONES DE ACCIÓN */
+.totales { padding: 20px; background: var(--gris-claro); border-top: 1px solid #ddd; }
 
-.fila-total { display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+.botones-accion-carrito { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 
-.botones-accion-carrito { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-
-.btn-exito, .btn-secundario, .btn-anular {
-    padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white;
+.btn-exito, .btn-secundario, .btn-anular, .btn-gray {
+    padding: 15px; border: none; border-radius: 12px; cursor: pointer; color: white; font-size: 1.2rem;
 }
 
 .btn-exito { background: var(--exito); }
 .btn-secundario { background: var(--oscuro); }
-.btn-anular { background: #f4a261; } /* Naranja suave */
+.btn-anular { background: #f4a261; }
+.btn-gray { background: #6c757d; }
 
-/* 8. MODAL DE PAGO (MEJORADO) */
+/* 8. MODAL DE PAGO PROFESIONAL */
 .btn-pago {
-    padding: 18px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    width: 100%;
-    margin-bottom: 10px;
+    padding: 18px; border: none; border-radius: 15px; color: white; font-weight: bold;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; margin-bottom: 10px; box-shadow: var(--sombra);
 }
 
-.btn-pago:hover { filter: brightness(1.1); transform: translateY(-2px); }
-.btn-pago:active { transform: translateY(0); }
+.btn-pago:active { transform: scale(0.98); }
 
-/* 9. MODALES GENERALES */
+/* 9. MODALES Y TABS */
 .modal {
-    display: none; position: fixed; z-index: 1000;
-    left: 0; top: 0; width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
 }
 
 .contenido-modal {
-    background-color: white; margin: 3% auto;
-    width: 90%; max-width: 500px; border-radius: 20px;
-    overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: white; margin: 2% auto; width: 95%; max-width: 550px;
+    border-radius: 25px; overflow: hidden; animation: zoomIn 0.3s;
 }
 
-.header-modal { background: var(--oscuro); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+@keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.btn-cerrar { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.header-modal { background: var(--oscuro); color: white; padding: 18px; display: flex; justify-content: space-between; }
 
-/* 10. CUENTA CARDS (SUB-MESAS) */
-.btn-cuenta-card {
-    background: var(--gris-claro);
-    border: 2px solid #ddd;
-    padding: 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-.btn-cuenta-card:hover { border-color: var(--primario); background: white; }
+.btn-cerrar { background: none; border: none; color: white; font-size: 1.8rem; cursor: pointer; }
 
-/* 11. BOTONES FLOTANTES */
-.botones-flotantes { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 12px; }
+/* 10. HISTORIAL PRO */
+#tabla-ventas { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+#tabla-ventas td { background: #fff; padding: 15px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+#tabla-ventas td:first-child { border-left: 1px solid #eee; border-radius: 12px 0 0 12px; }
+#tabla-ventas td:last-child { border-right: 1px solid #eee; border-radius: 0 12px 12px 0; }
 
-.btn-flotante {
-    width: 55px; height: 55px; border-radius: 50%; border: none; color: white; cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1.2rem; transition: 0.3s;
-}
-
-.btn-flotante.gray { background: #6c757d; }
-.btn-flotante.green { background: var(--exito); }
-
-/* 12. PANTALLA DE LOGIN */
+/* 11. LOGIN DOBLE ROL */
 .login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--oscuro); z-index: 2000;
-    display: flex; justify-content: center; align-items: center;
+    background: var(--oscuro); z-index: 3000; display: flex; align-items: center; justify-content: center;
 }
 
 .login-box {
-    background: white; padding: 40px; border-radius: 25px;
-    text-align: center; width: 90%; max-width: 380px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    background: white; padding: 40px; border-radius: 30px; width: 90%; max-width: 400px;
+    text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-.login-box input {
-    width: 100%; padding: 15px; margin: 15px 0;
-    border: 2px solid #eee; border-radius: 12px; font-size: 1.5rem; text-align: center;
+.login-box input, .login-box select {
+    width: 100%; padding: 18px; margin: 15px 0; border: 2px solid #f0f0f0;
+    border-radius: 15px; font-size: 1.3rem; text-align: center;
 }
 
-/* 13. IMPRESIÓN 80mm */
+/* 12. IMPRESIÓN TÉRMICA 80mm */
 #area-impresion { display: none; }
 @page { size: 80mm auto; margin: 0; }
+
 @media print {
     header, .mapa-mesas, main, .botones-flotantes, .modal { display: none !important; }
     #area-impresion {
         display: block !important; width: 80mm; padding: 4mm;
-        font-family: 'Courier New', Courier, monospace; background: white; color: black;
+        background: white; color: black; font-family: 'Courier New', monospace;
     }
-    .ticket-header { text-align: center; }
-    .ticket-divisor { border-top: 1px dashed black; margin: 5px 0; }
-    .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; }
-    .ticket-total { font-size: 1.2rem; font-weight: bold; text-align: right; }
+    .ticket-header { text-align: center; margin-bottom: 10px; }
+    .ticket-divisor { border-top: 1px dashed #000; margin: 8px 0; }
+    .ticket-fila { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 3px; }
+    .ticket-total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 10px; }
 }
 
-/* --- DISEÑO DE HISTORIAL PRO --- */
+/* 13. BOTONES FLOTANTES */
+.botones-flotantes { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 15px; }
 
-#tabla-ventas {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Espacio entre filas */
-    margin-top: 10px;
+.btn-flotante {
+    width: 60px; height: 60px; border-radius: 50%; border: none; color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4); cursor: pointer; font-size: 1.3rem; transition: 0.3s;
 }
 
-#tabla-ventas th {
-    background: transparent;
-    color: var(--oscuro);
-    padding: 12px;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 2px solid #ddd;
-}
-
-#tabla-ventas td {
-    background: white;
-    padding: 15px 12px;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    font-size: 0.95rem;
-}
-
-/* Redondear las esquinas de cada fila */
-#tabla-ventas td:first-child { border-left: 1px solid #eee; border-radius: 10px 0 0 10px; }
-#tabla-ventas td:last-child { border-right: 1px solid #eee; border-radius: 0 10px 10px 0; }
-
-#tabla-ventas tr:hover td {
-    background-color: #f8f9fa;
-    border-color: var(--primario);
-}
-
-.badge-id {
-    background: var(--oscuro);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
-
-.monto-historial {
-    color: var(--exito);
-    font-weight: bold;
-    font-size: 1.05rem;
-}
-
-.btn-borrar-v {
-    background: #fff0f0;
-    color: var(--primario);
-    border: 1px solid #ffcccc;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.btn-borrar-v:hover {
-    background: var(--primario);
-    color: white;
-}
-
-.tarjeta-producto.agotado {
-    opacity: 0.5;
-    filter: grayscale(1);
-    cursor: not-allowed !important;
-}
-
-.tarjeta-producto.agotado::after {
-    content: "AGOTADO";
-    color: red;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
-
-.low-stock {
-    color: #e63946;
-    font-weight: bold;
-    animation: blink 1s infinite;
-}
-
-@keyframes blink { 
-    0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } 
-}
-
-.logo-menu { 
-            width: 220px; /* Tamaño ideal */
-            height: auto;
-            filter: drop-shadow(0 0 15px rgba(0,0,0,0.5)); /* Sombra para resaltar */
-            animation: aparecerLogo 1.5s ease-out;
-        }
-
-        @keyframes aparecerLogo {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .hero { 
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                        url('https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1000'); /* Imagen de fondo de carbón encendido */
-            background-size: cover; 
-            background-position: center;
-            text-align: center; 
-            padding: 60px 20px; 
-            border-bottom: 5px solid var(--rojo);
-        }
+.btn-flotante:hover { transform: scale(1.1); }
+.btn-flotante.dark { background: #1a1a1a; }
+.btn-flotante.gray { background: #6c757d; }
+.btn-flotante.green { background: var(--exito); }
