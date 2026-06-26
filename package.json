@@ -23,6 +23,32 @@
   },
   "devDependencies": {
     "electron": "^42.5.0",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.carbonazo.pos",
+    "productName": "Asado El Carbonazo PRO",
+    "copyright": "Copyright © 2024 Asado El Carbonazo",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "public/icono.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "El Carbonazo POS"
+    }
   }
 }
