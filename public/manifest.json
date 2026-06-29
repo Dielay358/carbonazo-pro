@@ -1,7 +1,7 @@
 {
   "name": "Asado El Carbonazo PRO",
   "short_name": "Carbonazo",
-  "description": "Sistema POS para Restaurante",
+  "description": "Sistema de Ventas Profesional",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1d3557",

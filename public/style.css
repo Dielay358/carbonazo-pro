@@ -249,52 +249,79 @@ header {
 }
 
 /* =========================================
-   ADAPTACIÓN PARA CELULARES (RESPONSIVE)
+   SISTEMA RESPONSIVO (ADAPTACIÓN MÓVIL)
    ========================================= */
 
-@media (max-width: 768px) {
-    /* 1. Cambiar el diseño de 2 columnas a 1 sola columna */
+@media (max-width: 900px) {
+    /* 1. Reorganizar Layout: Carrito pasa abajo del Menú */
     .contenedor-principal {
         grid-template-columns: 1fr; /* Una sola columna */
         overflow-y: auto;
+        display: block; /* Permite scroll natural hacia abajo */
     }
 
-    /* 2. Ajustar el Mapa de Mesas */
-    .mesa-btn {
-        width: 70px; /* Mesas más pequeñas para que quepan más */
-        height: 50px;
-        font-size: 0.7rem;
-    }
-
-    /* 3. Ajustar los Productos */
-    .grid-productos {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    /* 2. Header más compacto para celulares */
+    header {
+        padding: 10px;
+        flex-direction: column;
         gap: 10px;
+    }
+    
+    .usuario-selector { width: 100%; justify-content: center; }
+
+    /* 3. Mapa de Mesas: Botones más táctiles */
+    .mapa-mesas {
+        padding: 10px;
+        gap: 5px;
+    }
+    
+    .mesa-btn {
+        width: calc(33% - 10px); /* 3 mesas por fila en celular */
+        height: 65px;
+        font-size: 0.75rem;
+    }
+
+    /* 4. Categorías con scroll lateral más suave */
+    .filtros-categoria {
+        padding: 10px;
+        margin-bottom: 5px;
+    }
+
+    /* 5. Productos: Tarjetas más grandes para el dedo */
+    .grid-productos {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+        padding: 5px;
     }
 
     .tarjeta-producto {
-        padding: 10px;
+        padding: 12px 8px;
     }
 
-    .tarjeta-producto div {
-        font-size: 1.5rem !important; /* Iconos más pequeños */
-    }
-
-    /* 4. Hacer que el Carrito sea una sección móvil */
+    /* 6. Carrito: Estilo de "Cierre de pedido" */
     .seccion-carrito {
         margin-top: 20px;
         border-radius: 20px 20px 0 0;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        min-height: 400px;
     }
 
-    /* 5. Ajustar el Header */
-    header {
-        padding: 0.5rem 1rem;
-        flex-wrap: wrap;
-        gap: 10px;
+    /* 7. Modales: Ocupar casi toda la pantalla */
+    .contenido-modal {
+        width: 98%;
+        margin: 2% auto;
+        max-height: 95vh;
     }
 
-    .logo { font-size: 1.1rem; }
-    
-    .tasa-display { font-size: 0.8rem; }
+    /* 8. Botones Flotantes: Más grandes para el pulgar */
+    .btn-flotante {
+        width: 50px;
+        height: 50px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Ajuste para teléfonos muy pequeños (iPhone SE, etc) */
+@media (max-width: 400px) {
+    .mesa-btn { width: calc(50% - 10px); } /* 2 mesas por fila */
+    .grid-productos { grid-template-columns: 1fr 1fr; }
 }
