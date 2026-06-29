@@ -247,3 +247,54 @@ header {
         background: white; color: black; font-family: 'Courier New', monospace;
     }
 }
+
+/* =========================================
+   ADAPTACIÓN PARA CELULARES (RESPONSIVE)
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* 1. Cambiar el diseño de 2 columnas a 1 sola columna */
+    .contenedor-principal {
+        grid-template-columns: 1fr; /* Una sola columna */
+        overflow-y: auto;
+    }
+
+    /* 2. Ajustar el Mapa de Mesas */
+    .mesa-btn {
+        width: 70px; /* Mesas más pequeñas para que quepan más */
+        height: 50px;
+        font-size: 0.7rem;
+    }
+
+    /* 3. Ajustar los Productos */
+    .grid-productos {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .tarjeta-producto {
+        padding: 10px;
+    }
+
+    .tarjeta-producto div {
+        font-size: 1.5rem !important; /* Iconos más pequeños */
+    }
+
+    /* 4. Hacer que el Carrito sea una sección móvil */
+    .seccion-carrito {
+        margin-top: 20px;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* 5. Ajustar el Header */
+    header {
+        padding: 0.5rem 1rem;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .logo { font-size: 1.1rem; }
+    
+    .tasa-display { font-size: 0.8rem; }
+}
