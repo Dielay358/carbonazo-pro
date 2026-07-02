@@ -3,70 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Parrilla - El Carbonazo</title>
+    <title>Monitor Parrilla - El Carbonazo</title>
     <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { background: #1a1a1a; color: white; padding: 0; margin: 0; }
-        .grid-cocina { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; padding: 15px; }
-        .pedido-card { background: #ffffff; color: #333; border-radius: 12px; padding: 15px; border-left: 8px solid var(--primario); position: relative; animation: blinkNew 0.5s ease-in-out; }
-        @keyframes blinkNew { from { transform: scale(0.9); } to { transform: scale(1); } }
-        .pedido-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f0f0; margin-bottom: 10px; }
-        .item-row { font-size: 1.3rem; padding: 8px 0; border-bottom: 1px solid #f1f1f1; }
-        .nota-cocina { background: #ffebee; color: #c62828; padding: 5px 10px; border-radius: 6px; font-size: 1rem; font-weight: bold; margin-top: 5px; border: 1px dashed #c62828; }
-        .btn-listo { background: var(--exito); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 1.1rem; }
+        body { background: #111; color: white; padding: 0; margin: 0; }
+        .grid-cocina { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; padding: 20px; }
+        .pedido-card { background: white; color: #222; border-radius: 15px; padding: 20px; border-left: 10px solid var(--primario); animation: push 0.3s ease-out; }
+        @keyframes push { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .item-row { font-size: 1.5rem; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .nota { color: var(--primario); font-weight: bold; background: #fff0f0; padding: 5px; border-radius: 5px; font-size: 1.1rem; }
     </style>
 </head>
 <body>
-    <header style="background:var(--oscuro); display:flex; justify-content:space-between; align-items:center; padding:10px 20px;">
+    <header style="background:var(--oscuro); display:flex; justify-content:space-between; align-items:center; padding:15px 25px;">
         <h2><i class="fas fa-fire"></i> MONITOR DE PARRILLA</h2>
-        <div id="reloj" style="font-size: 1.5rem; font-family: monospace;"></div>
+        <div id="reloj" style="font-size: 1.5rem; font-family: monospace; color: var(--dorado);"></div>
     </header>
 
-    <div id="grid-cocina" class="grid-cocina"></div>
+    <div id="grid-cocina" class="grid-cocina">
+        <!-- Las órdenes aparecerán aquí mágicamente -->
+    </div>
 
     <script>
-        async function cargarPedidos() {
-    try {
-        // Llamada a la ruta que acabamos de crear en server.js
-        const res = await fetch(window.location.origin + '/cocina-pendientes');
-        if (!res.ok) throw new Error("Error en servidor");
-        const pedidos = await res.json();
-        const grid = document.getElementById('grid-cocina');
-        
-        grid.innerHTML = pedidos.map(p => {
-            const items = JSON.parse(p.items);
-            return `
-                <div class="pedido-card">
-                    <div class="pedido-header">
-                        <h2>${p.mesa}</h2>
-                        <span style="font-family:monospace;">${p.fecha_apertura.split(', ')[1]}</span>
-                    </div>
-                    <div>
-                        ${items.map(i => `<div class="item-row"><strong>${i.cantidad}</strong> x ${i.nombre}</div>`).join('')}
-                    </div>
-                    <p>Mesero: ${p.mesero}</p>
-                    <button class="btn-listo" onclick="marcarListo('${p.mesa}')">ORDEN COMPLETADA</button>
-                </div>
-            `;
-        }).join('');
-    } catch(e) { console.error("Monitor de cocina en espera de pedidos..."); }
-}
+        const socket = io();
+
+        async function cargarOrdenes() {
+            try {
+                const res = await fetch(window.location.origin + '/cocina-pendientes');
+                if (!res.ok) throw new Error("404");
+                const pedidos = await res.json();
+                const grid = document.getElementById('grid-cocina');
+                
+                if (pedidos.length === 0) {
+                    grid.innerHTML = '<h2 style="grid-column: 1/-1; text-align:center; opacity:0.5; margin-top:50px;">Sin pedidos pendientes...</h2>';
+                    return;
+                }
+
+                grid.innerHTML = pedidos.map(p => {
+                    const items = JSON.parse(p.items);
+                    return `
+                        <div class="pedido-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #ddd; margin-bottom:10px;">
+                                <h1 style="margin:0;">${p.mesa}</h1>
+                                <span style="background:#eee; padding:5px 10px; border-radius:8px;">${p.fecha_apertura.split(', ')[1]}</span>
+                            </div>
+                            <div style="min-height:120px;">
+                                ${items.map(i => `
+                                    <div class="item-row">
+                                        <strong>${i.cantidad}</strong> x ${i.nombre}
+                                        ${i.nota ? `<div class="nota">⚠️ ${i.nota}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button onclick="marcarListo('${p.mesa}')" class="btn-exito" style="width:100%; margin-top:20px; font-size:1.2rem;">ORDEN LISTA</button>
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { 
+                console.log("Esperando conexión con el servidor...");
+            }
+        }
 
         async function marcarListo(mesa) {
-    const ok = confirm(`¿Marcar pedido de ${mesa} como LISTO?`);
-    if (ok) {
-        await fetch(window.location.origin + '/cocina-listo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mesa: mesa })
-        });
-        alert("Mesero notificado 🚀");
-        cargarPedidos();
-    }
-}
+            if (confirm(`¿Marcar ${mesa} como lista?`)) {
+                await fetch(window.location.origin + '/cocina-listo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mesa })
+                });
+                socket.emit('notificar_cambio');
+                cargarOrdenes();
+            }
+        }
 
-        setInterval(cargarPedidos, 5000);
-        cargarPedidos();
+        // ⚡ Escuchar cambios en vivo
+        socket.on('actualizar_pantallas', () => {
+            console.log("🔔 Nueva orden recibida!");
+            cargarOrdenes();
+        });
+
+        // Inicio
+        cargarOrdenes();
         setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString(); }, 1000);
     </script>
 </body>
