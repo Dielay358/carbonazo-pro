@@ -253,71 +253,70 @@ header {
    ========================================= */
 
 @media (max-width: 900px) {
-    /* 1. Reorganizar Layout: Carrito pasa abajo del Menú */
     .contenedor-principal {
-        grid-template-columns: 1fr; /* Una sola columna */
+        grid-template-columns: 1fr;
+        padding-bottom: 80px; /* Espacio para que la barra no tape el último producto */
+        display: block;
         overflow-y: auto;
-        display: block; /* Permite scroll natural hacia abajo */
     }
 
-    /* 2. Header más compacto para celulares */
-    header {
-        padding: 10px;
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .usuario-selector { width: 100%; justify-content: center; }
-
-    /* 3. Mapa de Mesas: Botones más táctiles */
-    .mapa-mesas {
-        padding: 10px;
-        gap: 5px;
-    }
-    
-    .mesa-btn {
-        width: calc(33% - 10px); /* 3 mesas por fila en celular */
-        height: 65px;
-        font-size: 0.75rem;
-    }
-
-    /* 4. Categorías con scroll lateral más suave */
-    .filtros-categoria {
-        padding: 10px;
-        margin-bottom: 5px;
-    }
-
-    /* 5. Productos: Tarjetas más grandes para el dedo */
-    .grid-productos {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 8px;
-        padding: 5px;
-    }
-
-    .tarjeta-producto {
-        padding: 12px 8px;
-    }
-
-    /* 6. Carrito: Estilo de "Cierre de pedido" */
+    /* Ocultar el carrito del flujo normal */
     .seccion-carrito {
-        margin-top: 20px;
-        border-radius: 20px 20px 0 0;
-        min-height: 400px;
+        position: fixed;
+        bottom: -100%; /* Escondido abajo */
+        left: 0;
+        width: 100%;
+        height: 80vh; /* Ocupa casi toda la pantalla al abrirse */
+        z-index: 2500;
+        transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
     }
 
-    /* 7. Modales: Ocupar casi toda la pantalla */
-    .contenido-modal {
-        width: 98%;
-        margin: 2% auto;
-        max-height: 95vh;
+    .seccion-carrito.abierto {
+        bottom: 0; /* Sube al abrirse */
     }
 
-    /* 8. Botones Flotantes: Más grandes para el pulgar */
-    .btn-flotante {
-        width: 50px;
+    /* Barra flotante inferior (La que siempre verás) */
+    .btn-ver-pedido-movil {
+        display: flex;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        background: var(--oscuro);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 50px;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 2000;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        border: 2px solid var(--primario);
+    }
+
+    .btn-cerrar-carrito {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    /* Hacer el menú más cómodo */
+    .grid-productos {
+        grid-template-columns: 1fr 1fr; /* Dos platos por fila para que se vean grandes */
+    }
+
+    .mesa-btn {
+        width: 70px;
         height: 50px;
-        font-size: 1.1rem;
     }
+}
+
+/* Esconder el botón en PC */
+@media (min-width: 901px) {
+    .btn-ver-pedido-movil, .btn-cerrar-carrito { display: none; }
 }
 
 /* Ajuste para teléfonos muy pequeños (iPhone SE, etc) */

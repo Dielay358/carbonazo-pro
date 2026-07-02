@@ -505,3 +505,25 @@ function validarSumaCombinada() {
     if (btn) btn.disabled = Math.abs(t-s) > 0.1;
 }
 function cambiarMesero() { usuarioLogueado = document.getElementById('select-mesero').value; }
+
+function toggleCarritoMovil() {
+    const panel = document.getElementById('carrito-panel');
+    panel.classList.toggle('abierto');
+    reproducirSonido('click');
+}
+
+// Modifica tu función actualizarInterfazCarrito() para que actualice la barra flotante
+const originalActualizarCarrito = actualizarInterfazCarrito;
+actualizarInterfazCarrito = function() {
+    originalActualizarCarrito(); // Ejecuta lo de antes
+    
+    // Nueva lógica para móvil
+    const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    const cantItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    
+    const labelCant = document.getElementById('cant-items-movil');
+    const labelTotal = document.getElementById('total-movil');
+    
+    if(labelCant) labelCant.innerText = cantItems;
+    if(labelTotal) labelTotal.innerText = `C$ ${total.toFixed(2)}`;
+};

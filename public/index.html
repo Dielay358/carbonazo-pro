@@ -72,11 +72,20 @@
         <div class="grid-productos" id="contenedor-menu"></div>
     </section>
 
-    <section class="seccion-carrito">
-        <div class="cabecera-carrito">
-            <h3>PEDIDO</h3>
-            <span id="label-mesa-activa">Ninguna mesa</span>
-        </div>
+    <!-- Botón flotante para ver pedido (Solo se verá en celular) -->
+<div id="btn-ver-pedido-movil" class="btn-ver-pedido-movil" onclick="toggleCarritoMovil()">
+    <i class="fas fa-shopping-basket"></i>
+    <span>Ver Pedido (<span id="cant-items-movil">0</span>)</span>
+    <strong id="total-movil">C$ 0.00</strong>
+</div>
+
+<section class="seccion-carrito" id="carrito-panel">
+    <!-- El contenido interno (cabecera, lista-items, totales) se queda exactamente igual -->
+    <div class="cabecera-carrito">
+        <h3><i class="fas fa-shopping-cart"></i> Pedido</h3>
+        <!-- Botón para cerrar en móvil -->
+        <button class="btn-cerrar-carrito" onclick="toggleCarritoMovil()">✕</button>
+    </div>
         <div class="info-pedido">
             <select id="tipo-pedido">
                 <option value="Mesa">Mesa</option>
