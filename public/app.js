@@ -5,6 +5,7 @@
 
 const URL_SERVIDOR = window.location.origin;
 const TOKEN_ACCESO = "carbonazo2024pro";
+const socket = io();
 
 // --- 1. ESTADO GLOBAL ---
 let usuarioLogueado = "Mesero"; 
@@ -21,25 +22,22 @@ const labelMesaActiva = document.getElementById('label-mesa-activa');
 // --- 2. INICIALIZACIÓN Y LIVE SYNC ---
 window.onload = async () => {
     console.log("🚀 El Carbonazo Pro LIVE: Motor Iniciado");
+    await cargarUsuariosLista();
+    await obtenerProductosDB();
+    await cargarTasaCambio();
+    await refrescarMesas();
+};
     
     if (typeof io !== 'undefined') {
         socket = io();
         socket.on('actualizar_pantallas', async () => {
             if (!subCuentaActiva) {
-                console.log("🔄 Sync Live: Actualizando...");
+                console.log("⚡ Sincronizando en vivo...");
                 await refrescarMesas();
                 await obtenerProductosDB();
             }
         });
     }
-
-    try {
-        await cargarUsuariosLista();
-        await obtenerProductosDB();
-        await cargarTasaCambio();
-        await refrescarMesas();
-    } catch (e) { console.error("Error en arranque:", e); }
-};
 
 // --- 3. LÓGICA DE ROLES Y LOGIN ---
 
@@ -71,6 +69,7 @@ async function intentarLoginAdmin() {
 
 // --- 4. MAPA DE MESAS ---
 
+// --- FUNCIONES DE MESAS ---
 function dibujarMapaMesas() {
     const contenedor = document.getElementById('contenedor-mesas');
     if (!contenedor) return;
@@ -78,7 +77,7 @@ function dibujarMapaMesas() {
     for (let i = 1; i <= 10; i++) {
         const idBase = `Mesa ${i}`;
         const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idBase));
-        const totalMesa = cuentas.reduce((acc, c) => acc + (parseFloat(c.total_actual) || 0), 0);
+        const totalMesa = cuentas.reduce((acc, c) => acc + parseFloat(c.total_actual), 0);
         const btn = document.createElement('button');
         btn.className = `mesa-btn ${cuentas.length > 0 ? 'ocupada' : ''} ${mesaSeleccionada === idBase ? 'seleccionada' : ''}`;
         btn.innerHTML = `<i class="fas fa-utensils"></i><br>${idBase}${cuentas.length > 1 ? ` (${cuentas.length})` : ''}`;
@@ -96,27 +95,20 @@ function dibujarMapaMesas() {
 async function refrescarMesas() {
     try {
         const res = await fetch(`${URL_SERVIDOR}/mesas-abiertas`);
-        const nuevas = await res.json();
-        nuevas.forEach(m => {
-            const ant = mesasAbiertas.find(ma => ma.mesa === m.mesa);
-            if (m.estado_cocina === 'Listo' && (!ant || ant.estado_cocina === 'Pendiente')) {
-                alert(`🔔 ¡ORDEN LISTA EN ${m.mesa}!`);
-                reproducirSonido('exito');
-            }
-        });
-        mesasAbiertas = nuevas; dibujarMapaMesas();
-    } catch(e) { console.error("Error sync"); }
+        mesasAbiertas = await res.json();
+        dibujarMapaMesas();
+    } catch(e) { console.error("Error mesas"); }
 }
 
 async function abrirSelectorDeCuenta(idBase) {
-    vibrar();
+    reproducirSonido('click');
     const cuentas = mesasAbiertas.filter(m => m.mesa.startsWith(idBase));
     mesaSeleccionada = idBase;
-    if (cuentas.length === 0) activarCuentaDirecta(idBase);
+    if (cuentas.length === 0) seleccionarCuentaDirecta(idBase);
     else {
         document.getElementById('titulo-selector-mesa').innerText = idBase;
         document.getElementById('lista-cuentas-mesa').innerHTML = cuentas.map(c => `
-            <div class="btn-cuenta-card" onclick="activarCuentaDirecta('${c.mesa}')">
+            <div class="btn-cuenta-card" onclick="seleccionarCuentaDirecta('${c.mesa}')">
                 <strong>${c.mesa.split(' - ')[1] || 'Principal'}</strong>
                 <span>C$ ${parseFloat(c.total_actual).toFixed(2)}</span>
             </div>
@@ -125,39 +117,50 @@ async function abrirSelectorDeCuenta(idBase) {
     }
 }
 
-function activarCuentaDirecta(nombre) {
+function seleccionarCuentaDirecta(nombre) {
     subCuentaActiva = nombre;
     mesaSeleccionada = nombre.split(' - ')[0];
     document.getElementById('id-mesa').value = nombre;
-    if (labelMesaActiva) labelMesaActiva.innerText = `Editando: ${nombre}`;
     const pedido = mesasAbiertas.find(m => m.mesa === nombre);
     carrito = pedido ? JSON.parse(pedido.items) : [];
     actualizarInterfazCarrito();
     cerrarModal();
 }
 
-function prepararNuevaSubCuenta() {
-    const n = prompt("Nombre para la cuenta nueva:");
-    if (n) { activarCuentaDirecta(`${mesaSeleccionada} - ${n}`); }
+// --- ACCIONES LIVE ---
+async function guardarPedidoTemporal() {
+    if (!subCuentaActiva) return alert("Seleccione mesa");
+    const total = carrito.reduce((acc, i) => acc + (i.precio * i.cantidad), 0);
+    const res = await fetch(`${URL_SERVIDOR}/guardar-mesa`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mesa: subCuentaActiva, items: carrito, mesero: usuarioLogueado, total_actual: total })
+    });
+    if (res.ok) {
+        reproducirSonido('exito');
+        socket.emit('notificar_cambio'); // ⚡ AVISO LIVE
+        limpiarPantallaPostAccion();
+        alert("Enviado a Cocina 🔥");
+    }
 }
 
-// --- 5. MENÚ Y CLICS ---
+// --- UTILIDADES ---
+function cerrarModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+function reproducirSonido(t) { const s = document.getElementById(`sonido-${t}`); if (s) { s.currentTime=0; s.play().catch(()=>{}); } }
 
 async function obtenerProductosDB() {
     const res = await fetch(`${URL_SERVIDOR}/productos`);
     productos = await res.json();
+    cargarMenu(productos);
     const cats = ['Todos', ...new Set(productos.map(p => (p.categoria || 'General').trim()))];
     document.getElementById('barra-categorias').innerHTML = cats.sort().map(c => `<button class="btn-filtro" onclick="filtrarPorCategoria('${c}')">${c}</button>`).join('');
-    cargarMenu(productos);
 }
 
 function cargarMenu(lista) {
-    contenedorMenu.innerHTML = lista.map(p => `
-        <div class="tarjeta-producto ${p.stock <= 0 ? 'agotado' : ''}" onclick="intentarAgregar(${p.id}, ${p.stock})">
+    document.getElementById('contenedor-menu').innerHTML = lista.map(p => `
+        <div class="tarjeta-producto ${p.stock <= 0 ? 'agotado' : ''}" onclick="agregarProducto(${p.id})">
             <div style="font-size: 2.2rem;">${p.icono || '🍽️'}</div>
             <h3>${p.nombre}</h3>
-            <p style="color:var(--primario); font-weight:bold; margin:0;">C$ ${parseFloat(p.precio).toFixed(2)}</p>
-            <small>Stock: ${p.stock}</small>
+            <p style="color:var(--primario); font-weight:bold;">C$ ${parseFloat(p.precio).toFixed(2)}</p>
         </div>
     `).join('');
 }
